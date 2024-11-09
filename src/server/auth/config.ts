@@ -52,5 +52,9 @@ export const authConfig = {
       });
       return true;
     },
+    async redirect({ url, baseUrl }) {
+      console.log("Redirect Callback Triggered", { url, baseUrl });
+      return baseUrl;
+    },
   },
 } satisfies NextAuthConfig;
