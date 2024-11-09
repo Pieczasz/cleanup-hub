@@ -19,6 +19,7 @@ declare module "next-auth" {
   }
 }
 export const authConfig = {
+  debug: true,
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -32,12 +33,24 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    async session({ session, user }) {
+      console.log("Session Callback Triggered", { session, user });
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
+    async signIn({ user, account, profile, email }) {
+      console.log("SignIn Callback Triggered", {
+        user,
+        account,
+        profile,
+        email,
+      });
+      return true;
+    },
   },
 } satisfies NextAuthConfig;

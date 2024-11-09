@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["cleanup-hub_*"],
+  tablesFilter: ["*"],
 } satisfies Config;
