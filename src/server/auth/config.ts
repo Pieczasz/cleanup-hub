@@ -19,7 +19,6 @@ declare module "next-auth" {
   }
 }
 export const authConfig = {
-  debug: true,
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,

@@ -1,13 +1,14 @@
 import "@/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
 import { Lexend } from "next/font/google";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
 
 // Components
-import MaxWidthWrapper from "./components/MaxWidthWrapper";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import { ThemeProvider } from "@/components/theme-provider";
+import Provider from "@/components/Provider";
 
 export const metadata: Metadata = {
   title: "Cleanup Hub",
@@ -24,13 +25,24 @@ const lexend = Lexend({
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${lexend.variable}`}>
+    <html lang="en" className={`${lexend.variable}`} suppressHydrationWarning>
       <body>
-        <TRPCReactProvider>
-          <MaxWidthWrapper>{children}</MaxWidthWrapper>
-        </TRPCReactProvider>
+        <Provider>
+          <TRPCReactProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <MaxWidthWrapper>{children}</MaxWidthWrapper>
+            </ThemeProvider>
+          </TRPCReactProvider>
+        </Provider>
       </body>
     </html>
   );
