@@ -64,3 +64,6 @@
     @apply bg-background text-foreground;
   }
 }
+.lexend {
+  font-family: var(--font-lexend);
+}
