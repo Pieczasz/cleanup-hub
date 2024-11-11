@@ -12,25 +12,28 @@ import Link from "next/link";
 interface NavLink {
   path: string;
   name: string;
+  additionalStyles?: string;
 }
 
 const links: NavLink[] = [
   { path: "/events", name: "events" },
   { path: "/about", name: "about" },
   { path: "/contact", name: "contact" },
-  { path: "/signIn", name: "sign in" },
+  { path: "/signIn", name: "sign in", additionalStyles: "text-[#6FC03B]" },
 ];
 
 interface NavProps {
   containerStyles?: string;
   linkStyles?: string;
   underlineStyles?: string;
+  additionalStyles?: string;
 }
 
 const Nav: React.FC<NavProps> = ({
   containerStyles,
   linkStyles,
   underlineStyles,
+  additionalStyles,
 }) => {
   const path = usePathname();
   return (
@@ -39,7 +42,7 @@ const Nav: React.FC<NavProps> = ({
         <Link
           key={index}
           href={link.path}
-          className={`capitalize ${linkStyles}`}
+          className={`capitalize ${linkStyles} ${link.additionalStyles ?? ""}`}
         >
           {link.path === path && (
             <motion.span
@@ -47,7 +50,7 @@ const Nav: React.FC<NavProps> = ({
               animate={{ y: 0 }}
               transition={{ type: "tween" }}
               layoutId="underline"
-              className={underlineStyles}
+              className={`${underlineStyles} ${additionalStyles}`}
             />
           )}
           {link.name}

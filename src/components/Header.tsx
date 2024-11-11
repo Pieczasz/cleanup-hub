@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import Nav from "@/components/Nav";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import Socials from "@/components/Socials";
 
 // Icons
 import { Menu, X } from "lucide-react";
