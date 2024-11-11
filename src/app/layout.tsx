@@ -39,7 +39,7 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <MaxWidthWrapper>{children}</MaxWidthWrapper>
+              {children}
             </ThemeProvider>
           </TRPCReactProvider>
         </Provider>

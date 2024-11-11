@@ -55,7 +55,7 @@ const Socials: React.FC<SocialsProps> = ({
         <Link
           key={index}
           href={link.path}
-          className={`capitalize ${linkStyles} transition-colors hover:text-primary`}
+          className={`capitalize ${linkStyles} transition-colors hover:text-green-800`}
           target="_blank" // This will open the link in a new tab
           rel="noopener noreferrer" // This is a security measure
         >

@@ -15,7 +15,7 @@ interface NavLink {
 }
 
 const links: NavLink[] = [
-  { path: "/event", name: "event" },
+  { path: "/events", name: "events" },
   { path: "/about", name: "about" },
   { path: "/contact", name: "contact" },
   { path: "/signIn", name: "sign in" },

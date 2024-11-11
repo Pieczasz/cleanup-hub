@@ -1,6 +1,7 @@
 // Components
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import PageLayout from "@/components/PageLayout";
 
 // Functions
 import { auth } from "@/server/auth";
@@ -14,14 +15,8 @@ export default async function Home() {
   }
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1>Text</h1>
-        </div>
-      </main>
-      <Footer />
-    </>
+    <PageLayout>
+      <div></div>
+    </PageLayout>
   );
 }
