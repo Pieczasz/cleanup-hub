@@ -1,6 +1,8 @@
+// Components
 import Link from "next/link";
-
 import { LatestPost } from "@/components/post";
+
+// Functions
 import { auth } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
 

@@ -36,4 +36,14 @@ export const postRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
+
+  getUserByEmail: publicProcedure
+    .input(z.object({ email: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.email, input.email),
+      });
+
+      return user;
+    }),
 });

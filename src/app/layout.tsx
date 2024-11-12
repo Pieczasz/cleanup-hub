@@ -6,7 +6,6 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 
 // Components
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import Provider from "@/components/Provider";
 

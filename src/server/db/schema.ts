@@ -40,11 +40,12 @@ export const users = createTable("user", {
     .$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 255 }).notNull(),
-  emailVerified: timestamp("email_verified", {
+  emailVerified: timestamp("emailVerified", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
+  password: varchar("password", { length: 255 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -54,14 +55,14 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = createTable(
   "account",
   {
-    userId: varchar("user_id", { length: 255 })
+    userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),
     type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
-    providerAccountId: varchar("provider_account_id", {
+    providerAccountId: varchar("providerAccountId", {
       length: 255,
     }).notNull(),
     refresh_token: text("refresh_token"),
@@ -87,7 +88,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const sessions = createTable(
   "session",
   {
-    sessionToken: varchar("session_token", { length: 255 })
+    sessionToken: varchar("sessionToken", { length: 255 })
       .notNull()
       .primaryKey(),
     userId: varchar("user_id", { length: 255 })
@@ -99,7 +100,7 @@ export const sessions = createTable(
     }).notNull(),
   },
   (session) => ({
-    userIdIdx: index("session_user_id_idx").on(session.userId),
+    userIdIdx: index("sessionUserIdIdx").on(session.userId),
   }),
 );
 
@@ -108,7 +109,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 }));
 
 export const verificationTokens = createTable(
-  "verification_token",
+  "verificationToken",
   {
     identifier: varchar("identifier", { length: 255 }).notNull(),
     token: varchar("token", { length: 255 }).notNull(),

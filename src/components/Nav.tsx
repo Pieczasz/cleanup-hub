@@ -2,6 +2,8 @@
 
 // Functions
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 // Framer motion
 import { motion } from "framer-motion";
@@ -14,13 +16,6 @@ interface NavLink {
   name: string;
   additionalStyles?: string;
 }
-
-const links: NavLink[] = [
-  { path: "/events", name: "events" },
-  { path: "/about", name: "about" },
-  { path: "/contact", name: "contact" },
-  { path: "/signIn", name: "sign in", additionalStyles: "text-[#6FC03B]" },
-];
 
 interface NavProps {
   containerStyles?: string;
@@ -35,7 +30,40 @@ const Nav: React.FC<NavProps> = ({
   underlineStyles,
   additionalStyles,
 }) => {
+  const { data: session } = useSession();
+  const [isClient, setIsClient] = useState(false);
+  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const path = usePathname();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && session !== undefined) {
+      setIsSessionLoaded(true);
+    }
+  }, [session, isClient]);
+
+  // Don't render the "Sign In" link if user is authenticated
+  const links: NavLink[] = [
+    { path: "/events", name: "events" },
+    { path: "/about", name: "about" },
+    { path: "/contact", name: "contact" },
+    ...(isClient && !session
+      ? [
+          {
+            path: "/signIn",
+            name: "sign in",
+            additionalStyles: "text-[#6FC03B]",
+          },
+        ]
+      : []),
+  ];
+
+  // Render nothing until client-side hydration and session loading are complete
+  if (!isClient || !isSessionLoaded) return null;
+
   return (
     <nav className={containerStyles}>
       {links.map((link, index) => (
