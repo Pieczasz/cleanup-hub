@@ -33,7 +33,7 @@ const Header: React.FC = () => {
   }, [showSidebar]);
 
   return (
-    <header className="lexend py-10">
+    <header className="py-10">
       <MaxWidthWrapper>
         <div className="container max-w-screen-xl">
           <div className="flex items-center justify-between">
@@ -59,11 +59,14 @@ const Header: React.FC = () => {
                     onClick={() => {
                       setShowSidebar(true);
                     }}
-                    className="cursor-pointer"
+                    className="z-[9999] cursor-pointer"
                   />
                 )}
                 {showSidebar && (
-                  <X onClick={handleSidebarClose} className="cursor-pointer" />
+                  <X
+                    onClick={handleSidebarClose}
+                    className="z-[9999] cursor-pointer"
+                  />
                 )}
               </div>
             </div>
@@ -72,7 +75,7 @@ const Header: React.FC = () => {
         <AnimatePresence>
           {showSidebar && (
             <Sidebar
-              containerStyles="flex flex-col items-start p-4 justify-center text-center py-36"
+              containerStyles="flex flex-col items-start p-4 bg-white justify-center text-center py-36"
               linkStyles="py-4 w-full"
               underlineStyles="absolute left-0 top-full h-[2px] bg-primary w-full"
               onLinkClick={() => setShowSidebar(false)}

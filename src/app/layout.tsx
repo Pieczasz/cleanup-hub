@@ -28,7 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${lexend.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${lexend.variable} lexend`}
+      suppressHydrationWarning
+    >
       <body>
         <Provider>
           <TRPCReactProvider>

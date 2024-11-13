@@ -85,10 +85,7 @@ const LoginForm = () => {
         showSocial
       >
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="lexend space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <FormField
                 control={form.control}

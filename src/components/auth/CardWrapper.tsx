@@ -29,7 +29,7 @@ export const CardWrapper = ({
   cardFooterHref,
 }: CardWrapperProps) => {
   return (
-    <Card className="lexend mb-10 w-[400px] shadow-md">
+    <Card className="mb-10 w-[400px] shadow-md">
       <CardHeader>
         <Header label={headerLabel} text="" />
       </CardHeader>

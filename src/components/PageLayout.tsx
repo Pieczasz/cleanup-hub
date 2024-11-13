@@ -9,10 +9,8 @@ const PageLayout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
-        <div className="container flex flex-col items-center justify-center py-16">
-          {children}
-        </div>
+      <main className="flex min-h-screen w-full">
+        <div className="flex w-full flex-col py-16">{children}</div>
       </main>
       <Footer />
     </>

@@ -2,6 +2,8 @@
 
 // Functions
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 // Framer motion
 import { motion } from "framer-motion";
@@ -13,19 +15,14 @@ import Socials from "./Socials";
 interface SidebarLink {
   path: string;
   name: string;
+  additionalStyles?: string;
 }
-
-const links: SidebarLink[] = [
-  { path: "/events", name: "events" },
-  { path: "/about", name: "about" },
-  { path: "/contact", name: "contact" },
-  { path: "/signIn", name: "sign in" },
-];
 
 interface SidebarProps {
   containerStyles?: string;
   linkStyles?: string;
   underlineStyles?: string;
+  additionalStyles?: string;
   onLinkClick?: () => void;
 }
 
@@ -33,23 +30,57 @@ const Sidebar: React.FC<SidebarProps> = ({
   containerStyles,
   linkStyles,
   underlineStyles,
+  additionalStyles,
   onLinkClick,
 }) => {
+  const { data: session } = useSession();
+  const [isClient, setIsClient] = useState(false);
+  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const path = usePathname();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && session !== undefined) {
+      setIsSessionLoaded(true);
+    }
+  }, [session, isClient]);
+
+  // Define links conditionally based on session
+  const links: SidebarLink[] = [
+    { path: "/events", name: "events" },
+    { path: "/about", name: "about" },
+    { path: "/contact", name: "contact" },
+    ...(isClient && !session
+      ? [
+          {
+            path: "/signIn",
+            name: "sign in",
+            additionalStyles: "text-[#6FC03B]",
+          },
+        ]
+      : []),
+  ];
+
+  // Render nothing until client-side hydration and session loading are complete
+  if (!isClient || !isSessionLoaded) return null;
+
   return (
     <motion.div
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "tween", duration: 0.6 }}
-      className="fixed inset-0 top-20 z-[1000] h-[calc(100%-5rem)] w-full"
+      className="fixed inset-0 z-[1000] flex h-screen w-full flex-col justify-between bg-white"
     >
-      <nav className={containerStyles}>
+      <nav className={`flex flex-col items-center gap-y-6 ${containerStyles}`}>
         {links.map((link, index) => (
           <Link
             key={index}
             href={link.path}
-            className={`capitalize ${linkStyles}`}
+            className={`capitalize ${linkStyles} ${link.additionalStyles ?? ""}`}
             onClick={onLinkClick}
           >
             {link.path === path && (
@@ -58,14 +89,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                 animate={{ y: 0 }}
                 transition={{ type: "tween" }}
                 layoutId="underline"
-                className={underlineStyles}
+                className={`${underlineStyles} ${additionalStyles}`}
               />
             )}
             {link.name}
           </Link>
         ))}
       </nav>
-      <Socials containerStyles="flex flex-row justify-center items-start gap-x-4" />
+      <Socials containerStyles="flex flex-row justify-center items-center gap-x-4 p-4" />
     </motion.div>
   );
 };

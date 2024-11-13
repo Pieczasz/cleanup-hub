@@ -1,6 +1,9 @@
 // Components
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import MostPopularEvents from "@/components/MostPopularEvents";
 import PageLayout from "@/components/PageLayout";
 
 // Functions
@@ -16,7 +19,12 @@ export default async function Home() {
 
   return (
     <PageLayout>
-      <div></div>
+      <MaxWidthWrapper>
+        <div className="flex w-full flex-col items-center justify-center gap-y-32">
+          <Hero />
+          <MostPopularEvents />
+        </div>
+      </MaxWidthWrapper>
     </PageLayout>
   );
 }

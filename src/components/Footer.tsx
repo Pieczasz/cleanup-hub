@@ -5,10 +5,10 @@ import Socials from "./Socials";
 
 const Footer = () => {
   return (
-    <footer className="lexend bg-[#6AA553] pt-16 text-white">
+    <footer className="bg-[#6AA553] pt-16 text-white">
       <MaxWidthWrapper>
         <div className="flex flex-col items-center justify-center">
-          <div className="flex flex-row items-center justify-center gap-x-16">
+          <div className="flex flex-col items-center justify-center gap-x-16 space-y-12 lg:flex-row lg:space-y-0">
             <div>
               <h3 className="text-3xl font-semibold">
                 Small actions, <br />
