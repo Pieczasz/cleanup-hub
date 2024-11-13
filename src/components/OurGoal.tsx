@@ -17,15 +17,16 @@ const OurGoal = () => {
               events, we aim to:
             </p>
           </div>
-          <div className="flex flex-row items-center justify-center text-xl">
+          <div className="flex w-full flex-col items-center justify-center text-xl lg:flex-row">
             <Image
               src="/EarthImage.png"
               alt="Earth image"
+              className="pb-8 lg:pb-0"
               width={180}
               height={180}
             />
 
-            <p className="pl-8">
+            <p className="pl-0 lg:pl-8">
               <span className="font-semibold">
                 Restore and Preserve Natural Spaces:{" "}
               </span>
@@ -50,7 +51,7 @@ const OurGoal = () => {
               Connect people who care about the environment, creating a shared
               sense of responsibility and teamwork.
             </p>
-            <div className="flex flex-row items-center justify-center text-xl">
+            <div className="flex flex-col items-center justify-center pt-8 text-xl lg:flex-row lg:pt-0">
               <p className="pr-8">
                 <span className="font-semibold">Inspire Lasting Change: </span>
                 Empower individuals to take part in continuous clean-up efforts
@@ -60,6 +61,7 @@ const OurGoal = () => {
               <Image
                 src="/LeafImage.png"
                 alt="Leaf image"
+                className="pt-8 lg:pt-0"
                 width={180}
                 height={180}
               />
