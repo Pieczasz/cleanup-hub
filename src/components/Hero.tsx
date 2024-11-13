@@ -5,15 +5,17 @@ const Hero = () => {
   return (
     <div className="flex w-full flex-col items-center justify-between lg:flex-row">
       <div className="flex flex-col">
-        <h1 className="pb-4 text-6xl font-bold">
+        <h1 className="pb-4 text-7xl font-bold">
           Let’s Clean <br />
           Together!
         </h1>
-        <h3 className="pb-10 text-xl font-semibold">
-          Turn your concern for the planet into action with CleanupHub. Find
-          cleaning events nearby!
+        <h3 className="pb-10 text-2xl font-semibold">
+          Turn your concern for the <br />
+          planet into action with <br />
+          CleanupHub. Find cleaning <br />
+          events nearby!
         </h3>
-        <Button className="max-w-[12rem] bg-[#6AA553] text-lg text-white">
+        <Button className="max-w-[12rem] text-lg text-white">
           Join a Clean-Up
         </Button>
       </div>
@@ -21,8 +23,8 @@ const Hero = () => {
       <Image
         src="/CleanupHubLogo.png"
         alt="Hero section image"
-        width={800}
-        height={800}
+        width={512}
+        height={512}
         className="hidden lg:block"
       />
     </div>

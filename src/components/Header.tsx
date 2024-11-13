@@ -38,11 +38,11 @@ const Header: React.FC = () => {
         <div className="container max-w-screen-xl">
           <div className="flex items-center justify-between">
             <Link href="/" className="group relative">
-              <h4 className="text-xl font-semibold">
+              <h4 className="text-2xl font-semibold">
                 <span>Cleanup</span>
                 <span className="text-[#6AA553]">Hub</span>
               </h4>
-              <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-[#6daa53] bg-primary transition-all duration-500 group-hover:scale-x-100" />
+              <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-[#6DAA53] bg-primary transition-all duration-500 group-hover:scale-x-100" />
             </Link>
             <div className="flex items-center">
               <Nav
