@@ -17,7 +17,7 @@ const Hero = () => {
             CleanupHub. Find cleaning <br />
             events nearby!
           </h3>
-          <Button className="max-w-[12rem] text-lg text-white">
+          <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
             Join a Clean-Up
           </Button>
         </div>

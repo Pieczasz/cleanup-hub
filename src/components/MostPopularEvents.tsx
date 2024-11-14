@@ -44,7 +44,7 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] bg-[#6AA553] text-lg text-white">
+            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
               Join a Clean-Up
             </Button>
           </CardFooter>
@@ -78,7 +78,7 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] bg-[#6AA553] text-lg text-white">
+            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
               Join a Clean-Up
             </Button>
           </CardFooter>
@@ -112,7 +112,7 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] bg-[#6AA553] text-lg text-white">
+            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
               Join a Clean-Up
             </Button>
           </CardFooter>
