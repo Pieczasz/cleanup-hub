@@ -2,6 +2,7 @@
 import Hero from "@/components/Hero";
 import HowYouCanGetInvolved from "@/components/HowYouCanGetInvolved";
 import MostPopularEvents from "@/components/MostPopularEvents";
+import MostPopularQuestions from "@/components/MostPopularQuestions";
 import OurGoal from "@/components/OurGoal";
 import PageLayout from "@/components/PageLayout";
 
@@ -13,6 +14,7 @@ export default async function Home() {
         <MostPopularEvents />
         <OurGoal />
         <HowYouCanGetInvolved />
+        <MostPopularQuestions />
       </div>
     </PageLayout>
   );

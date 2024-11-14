@@ -19,7 +19,7 @@ const HowYouCanGetInvolved = () => {
               width={400}
               height={400}
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center justify-center lg:items-start">
               <h4 className="mb-2 text-2xl font-semibold">Volunteer</h4>
               <p className="mb-7 text-lg">
                 Join our community clean-up events and make a positive impact on
@@ -41,7 +41,7 @@ const HowYouCanGetInvolved = () => {
               height={400}
               className="block lg:hidden"
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center justify-center lg:items-start">
               <h4 className="mb-2 text-2xl font-semibold">Host an Event</h4>
               <p className="mb-7 text-lg">
                 Do you have a location in mind that needs a little extra care?
@@ -69,7 +69,7 @@ const HowYouCanGetInvolved = () => {
               width={400}
               height={400}
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center justify-center lg:items-start">
               <h4 className="mb-2 text-2xl font-semibold">Donate Supplies</h4>
               <p className="mb-7 text-lg">
                 Support our clean-up efforts by donating essential supplies like

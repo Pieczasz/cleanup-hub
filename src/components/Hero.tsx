@@ -5,7 +5,7 @@ import MaxWidthWrapper from "./MaxWidthWrapper";
 const Hero = () => {
   return (
     <MaxWidthWrapper>
-      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
+      <div className="mt-16 flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="flex flex-col">
           <h1 className="pb-4 text-7xl font-bold">
             Let’s Clean <br />
