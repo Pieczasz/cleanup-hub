@@ -1,7 +1,14 @@
+import PageLayout from "@/components/PageLayout";
 import React from "react";
 
-const page = () => {
-  return <div>page</div>;
+const About = () => {
+  return (
+    <PageLayout>
+      <div className="flex w-full flex-col items-center justify-center gap-y-32">
+        About
+      </div>
+    </PageLayout>
+  );
 };
 
-export default page;
+export default About;
