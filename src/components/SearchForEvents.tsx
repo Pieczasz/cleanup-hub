@@ -148,26 +148,29 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
       <div className="flex w-full flex-row">
         <div className="flex flex-col gap-y-4 lg:w-1/4">
           {session.status === "authenticated" && (
-            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
-                  Host an Event
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className="max-h-[90vh] max-w-[800px] overflow-hidden p-0"
-                aria-describedby="create-event-dialog-description"
-              >
-                <DialogHeader className="ml-4 mt-4">
-                  <DialogTitle>Create New Event</DialogTitle>
-                </DialogHeader>
-                <div id="create-event-dialog-description">
-                  <CreateEventForm onClose={() => setDialogOpen(false)} />
-                </div>
-              </DialogContent>
-            </Dialog>
+            <>
+              <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+                    Host an Event
+                  </Button>
+                </DialogTrigger>
+                <DialogContent
+                  className="max-h-[90vh] max-w-[800px] overflow-hidden p-0"
+                  aria-describedby="create-event-dialog-description"
+                >
+                  <DialogHeader className="ml-4 mt-4">
+                    <DialogTitle>Create New Event</DialogTitle>
+                  </DialogHeader>
+                  <div id="create-event-dialog-description">
+                    <CreateEventForm onClose={() => setDialogOpen(false)} />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <hr />
+            </>
           )}
-          <hr />
+
           <h4 className="text-xl font-semibold">Filters</h4>
         </div>
         <div className="flex flex-col lg:w-3/4"></div>
