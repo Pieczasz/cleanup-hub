@@ -1,8 +1,14 @@
+"use client";
+// Components
 import Image from "next/image";
 import { Button } from "./ui/button";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 
+// Functions
+import { useRouter } from "next/navigation";
+
 const Hero = () => {
+  const router = useRouter();
   return (
     <MaxWidthWrapper>
       <div className="mt-16 flex w-full flex-col items-center justify-between lg:flex-row">
@@ -17,7 +23,12 @@ const Hero = () => {
             CleanupHub. Find cleaning <br />
             events nearby!
           </h3>
-          <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+          <Button
+            className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+            onClick={() => {
+              router.push("/events");
+            }}
+          >
             Join a Clean-Up
           </Button>
         </div>

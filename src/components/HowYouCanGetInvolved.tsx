@@ -1,9 +1,27 @@
+"use client";
+
 // Components
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import { Button } from "./ui/button";
 import Image from "next/image";
 
+// Functions
+import { useRouter } from "next/navigation";
+
 const HowYouCanGetInvolved = () => {
+  const router = useRouter();
+
+  const handleHostEvent = () => {
+    // Navigate to the Events page first
+    router.push("/events");
+
+    // Use a small delay to ensure the page is loaded before opening the dialog
+    setTimeout(() => {
+      // Dispatch a custom event that the Events page can listen for
+      window.dispatchEvent(new CustomEvent("open-host-event-dialog"));
+    }, 100);
+  };
+
   return (
     <div className="flex w-full flex-col items-center justify-center">
       <MaxWidthWrapper>
@@ -28,7 +46,12 @@ const HowYouCanGetInvolved = () => {
                 individuals. Whether you can commit to just one event or
                 several, every bit of help counts!
               </p>
-              <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+              <Button
+                className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+                onClick={() => {
+                  router.push("/events");
+                }}
+              >
                 Search for Events
               </Button>
             </div>
@@ -50,7 +73,10 @@ const HowYouCanGetInvolved = () => {
                 our mission to life in your area. We’ll support you with
                 resources and tips to make your event successful.
               </p>
-              <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+              <Button
+                className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+                onClick={handleHostEvent}
+              >
                 Host an Event
               </Button>
             </div>
@@ -78,7 +104,12 @@ const HowYouCanGetInvolved = () => {
                 events running smoothly and ensures volunteers have what they
                 need to make a difference.
               </p>
-              <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+              <Button
+                className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+                onClick={() => {
+                  router.push("/events");
+                }}
+              >
                 Donate Supplies
               </Button>
             </div>

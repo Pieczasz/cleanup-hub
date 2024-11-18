@@ -1,3 +1,4 @@
+"use client";
 // Components
 import {
   Card,
@@ -7,7 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "./ui/button";
 
+// Functions
+import { useRouter } from "next/navigation";
+
 const MostPopularEvents = () => {
+  const router = useRouter();
+
   return (
     <div className="flex w-full flex-col items-center justify-center">
       <h2 className="mb-16 text-center text-4xl font-bold">
@@ -44,7 +50,12 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+            <Button
+              className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+              onClick={() => {
+                router.push("/events");
+              }}
+            >
               Join a Clean-Up
             </Button>
           </CardFooter>
@@ -78,7 +89,12 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+            <Button
+              className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+              onClick={() => {
+                router.push("/events");
+              }}
+            >
               Join a Clean-Up
             </Button>
           </CardFooter>
@@ -112,7 +128,12 @@ const MostPopularEvents = () => {
           </CardContent>
 
           <CardFooter className="flex items-center justify-center">
-            <Button className="max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+            <Button
+              className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+              onClick={() => {
+                router.push("/events");
+              }}
+            >
               Join a Clean-Up
             </Button>
           </CardFooter>

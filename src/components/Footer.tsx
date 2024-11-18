@@ -56,7 +56,7 @@ const Footer = () => {
               </Link>
             </div>
             <div className="flex flex-col items-center justify-center space-y-6">
-              <Link href="/" className="group relative">
+              <Link href="/events" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Join a Clean-Up
                 </h5>

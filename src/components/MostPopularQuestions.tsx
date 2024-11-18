@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+// Components
 import {
   Accordion,
   AccordionContent,
@@ -7,6 +9,9 @@ import {
 } from "@/components/ui/accordion";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import { Button } from "./ui/button";
+
+// Functions
+import { useRouter } from "next/navigation";
 
 const faqs = [
   {
@@ -73,6 +78,7 @@ const faqs = [
 ];
 
 const MostPopularQuestions = () => {
+  const router = useRouter();
   return (
     <div className="relative w-full overflow-hidden">
       <div className="relative flex items-center justify-center">
@@ -97,7 +103,12 @@ const MostPopularQuestions = () => {
               ))}
             </Accordion>
             <div className="mt-12 flex justify-center">
-              <Button className="mb-16 max-w-[12rem] rounded-3xl py-6 text-lg text-white">
+              <Button
+                className="mb-16 max-w-[12rem] rounded-3xl py-6 text-lg text-white"
+                onClick={() => {
+                  router.push("/faq");
+                }}
+              >
                 More Questions?
               </Button>
             </div>

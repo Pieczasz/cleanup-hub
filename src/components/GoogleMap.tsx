@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 const defaultMapContainerStyle = {
   width: "100%",
   height: "70vh",
-  borderRadius: "25px 0px 0px 25px",
+  borderRadius: "25px 25px 0px 25px",
 };
 
 //Fallback to Poland's coordinates
