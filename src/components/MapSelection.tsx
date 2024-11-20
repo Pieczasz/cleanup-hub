@@ -6,7 +6,7 @@ import {
   useMapEvents,
   Popup,
 } from "react-leaflet";
-import type { Map as LeafletMap, DivIcon, LatLngExpression } from "leaflet";
+import type { Map as LeafletMap, LatLngExpression } from "leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 

@@ -8,6 +8,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DateTimePicker24h } from "@/components/ui/date-picker";
@@ -23,6 +34,7 @@ import { z } from "zod";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useDebounce } from "use-debounce";
+import { api } from "@/trpc/react";
 
 // Map Component
 const MapWithNoSSR = dynamic(() => import("./MapSelection"), {
@@ -31,6 +43,8 @@ const MapWithNoSSR = dynamic(() => import("./MapSelection"), {
 
 // Icons
 import { FaLocationDot } from "react-icons/fa6";
+import { useRouter } from "next/navigation";
+import { Loader2, Check } from "lucide-react";
 
 // Type definitions for Nominatim API responses
 interface NominatimAddress {
@@ -62,6 +76,7 @@ const formSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(100, "Title must be less than 100 characters"),
+  type: z.enum(["cleaning", "treePlanting", "volunteering", "other"]),
   date: z
     .date()
     .refine((date) => date > new Date(), "Date must be in the future"),
@@ -160,14 +175,36 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     NominatimSearchResult[]
   >([]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const [debouncedAddress] = useDebounce("", 500) as unknown as [string];
+
+  const router = useRouter();
+
+  const createEventMutation = api.post.createEvent.useMutation({
+    onSuccess: (data: unknown) => {
+      if (typeof data === "object") {
+        toast({
+          title: "Success!",
+          description: "Event created successfully",
+        });
+      } else {
+        console.error("Unexpected data shape:", data);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
+      type: "cleaning",
       location: {
         address: "",
         coordinates: { lat: 0, lng: 0 },
@@ -220,16 +257,16 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   };
 
   const onSubmit = (data: FormSchema): void => {
-    console.log(data);
-    toast({
-      title: "Event Created",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+    createEventMutation.mutate({
+      title: data.title,
+      description: data.description,
+      date: data.date,
+      location: {
+        address: selectedAddress,
+        coordinates: selectedCoordinates ?? { lat: 0, lng: 0 },
+      },
+      type: data.type ?? "other",
     });
-    onClose();
   };
 
   const handleMapLocationSelect = async (
@@ -257,19 +294,57 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Local Park Clean-Up" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-row items-end gap-x-4">
+              <div className="w-3/4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Local Park Clean-Up" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-1/4">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="rounded-3xl py-6 lg:w-[180px]">
+                            <SelectValue placeholder="Type of Event" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Type of Event</SelectLabel>
+                              <SelectItem value="cleaning">Cleaning</SelectItem>
+                              <SelectItem value="treePlanting">
+                                Tree Planting
+                              </SelectItem>
+                              <SelectItem value="volunteering">
+                                Volunteering
+                              </SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="date"
@@ -363,10 +438,27 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
               </div>
             )}
             <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={createEventMutation.status === "pending"}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Create Event</Button>
+              <Button
+                type="submit"
+                disabled={createEventMutation.status === "pending"}
+                className="min-w-[100px]"
+              >
+                {createEventMutation.status === "pending" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : createEventMutation.isSuccess ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  "Create Event"
+                )}
+              </Button>
             </div>
           </form>
         </Form>
