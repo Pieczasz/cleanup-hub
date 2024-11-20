@@ -313,7 +313,11 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                     onChange={(e) => void handleAddressSearch(e.target.value)}
                   />
                 </FormControl>
-                <Button type="button" onClick={() => setShowMap(true)} >
+                <Button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  variant={"outline"}
+                >
                   <FaLocationDot />
                 </Button>
               </div>

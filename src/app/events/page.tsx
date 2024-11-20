@@ -1,6 +1,8 @@
 "use client";
 import { CreateEventForm } from "@/components/CreateEventForm";
-import OpenStreetMap from "@/components/Map";
+import dynamic from "next/dynamic";
+
+const OpenStreetMap = dynamic(() => import("@/components/Map"), { ssr: false });
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import PageLayout from "@/components/PageLayout";
 import SearchForEvents from "@/components/SearchForEvents";
