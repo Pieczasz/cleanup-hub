@@ -29,6 +29,9 @@ const MapWithNoSSR = dynamic(() => import("./MapSelection"), {
   ssr: false,
 });
 
+// Icons
+import { FaLocationDot } from "react-icons/fa6";
+
 // Type definitions for Nominatim API responses
 interface NominatimAddress {
   road?: string;
@@ -310,8 +313,8 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                     onChange={(e) => void handleAddressSearch(e.target.value)}
                   />
                 </FormControl>
-                <Button type="button" onClick={() => setShowMap(true)}>
-                  Select on Map
+                <Button type="button" onClick={() => setShowMap(true)} >
+                  <FaLocationDot />
                 </Button>
               </div>
               {addressSuggestions.length > 0 && (
@@ -329,7 +332,14 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                   ))}
                 </div>
               )}
-              {selectedAddress && <p>Selected Address: {selectedAddress}</p>}
+              <div className="mt-4 w-full">
+                {selectedAddress && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Selected Address:</span>{" "}
+                    {selectedAddress}
+                  </p>
+                )}
+              </div>
             </div>
             {showMap && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

@@ -15,6 +15,16 @@ const OpenStreetMap: React.FC = () => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
     }
+    return () => {
+      const mapContainers =
+        document.getElementsByClassName("leaflet-container");
+      Array.from(mapContainers).forEach((container) => {
+        const elem = container as HTMLElement & { _leaflet_id?: string };
+        if (elem._leaflet_id) {
+          elem._leaflet_id = undefined;
+        }
+      });
+    };
   }, []);
 
   return (
