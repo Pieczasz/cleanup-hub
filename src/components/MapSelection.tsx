@@ -75,28 +75,25 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
   };
   const mapRef = useRef<LeafletMap | null>(null);
-  const mapDivRef = useRef<HTMLDivElement | null>(null);
+
   const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    if (!mapDivRef.current) return;
-
     if (mapRef.current) {
       mapRef.current.invalidateSize();
     }
-    // Check if map already exists to avoid reuse
+
     if (mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapDivRef.current).setView(
-        [51.505, -0.09],
-        13,
-      );
-
-      L.tileLayer("https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png").addTo(
-        mapInstanceRef.current,
-      );
+      mapInstanceRef.current.invalidateSize();
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
     }
-
     return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
       Array.from(mapContainers).forEach((container) => {
@@ -110,12 +107,9 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
   return (
     <div className="flex flex-col gap-4" id="map-selection">
-      <div
-        className="h-[400px] w-full rounded-lg border border-gray-200"
-        ref={mapDivRef}
-      >
+      <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          key={`map-selection`}
+          key="map-selection"
           id="map-selection"
           center={defaultPosition}
           zoom={6}
