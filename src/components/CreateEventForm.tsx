@@ -86,6 +86,7 @@ const formSchema = z.object({
     .max(2000, "Description must be less than 2000 characters"),
   location: z.object({
     address: z.string().optional(),
+    name: z.string().optional(),
     coordinates: z
       .object({
         lat: z.number(),
@@ -170,6 +171,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   const [showMap, setShowMap] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] =
     useState<Coordinates | null>(null);
+  const [locationName, setLocationName] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
@@ -207,6 +209,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       type: "cleaning",
       location: {
         address: "",
+        name: "",
         coordinates: { lat: 0, lng: 0 },
       },
     },
@@ -263,6 +266,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       date: data.date,
       location: {
         address: selectedAddress,
+        name: locationName,
         coordinates: selectedCoordinates ?? { lat: 0, lng: 0 },
       },
       type: data.type ?? "other",
@@ -271,9 +275,12 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
 
   const handleMapLocationSelect = async (
     coordinates: Coordinates,
+    name?: string,
   ): Promise<void> => {
     form.setValue("location.coordinates", coordinates);
+    form.setValue("location.name", name);
     setSelectedCoordinates(coordinates);
+    setLocationName(name ?? "");
     try {
       const address = await fetchAddressFromCoordinates(
         coordinates.lat,
