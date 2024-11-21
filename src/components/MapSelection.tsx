@@ -84,6 +84,9 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
 
     return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
       Array.from(mapContainers).forEach((container) => {
@@ -99,6 +102,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     <div className="flex flex-col gap-4">
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
+          key={`map-${initialPosition.lat}-${initialPosition.lng}`}
           center={defaultPosition}
           zoom={6}
           className="h-full w-full rounded-lg"
