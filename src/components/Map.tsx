@@ -34,7 +34,7 @@ const OpenStreetMap: React.FC = () => {
         zoom={5}
         ref={mapRef as React.RefObject<L.Map>}
         className="map-container"
-        key="main-map" // Ensures the map container is uniquely identified
+        key="main-map"
       >
         <TileLayer
           attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

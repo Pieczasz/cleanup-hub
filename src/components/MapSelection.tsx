@@ -42,16 +42,6 @@ const customIcon = L.icon({
   popupAnchor: [5, -25],
 });
 
-const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
-  useMapEvents({
-    click: (event) => {
-      const { lat, lng } = event.latlng;
-      onMapClick({ lat, lng });
-    },
-  });
-  return null;
-};
-
 const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
@@ -68,6 +58,8 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
   >([]);
+
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -137,7 +129,11 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         );
       }
 
-      mapRef.current = null;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+      }
+
+      mapRef.current.remove();
     }
 
     return () => {
@@ -151,6 +147,23 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       });
     };
   }, [initialPosition]);
+
+  const MapComponent = () => {
+    const map = useMapEvents({
+      load: () => {
+        mapInstanceRef.current = map;
+      },
+      click: (e) => handleMapClick(e.latlng),
+    });
+
+    useEffect(() => {
+      if (initialPosition) {
+        map.setView([initialPosition.lat, initialPosition.lng], map.getZoom());
+      }
+    }, [map]);
+
+    return null;
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -178,20 +191,20 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       </div>
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          center={defaultPosition}
+          key={`map-${initialPosition.lat}-${initialPosition.lng}`}
+          center={[initialPosition.lat, initialPosition.lng]}
           zoom={6}
           className="h-full w-full rounded-lg"
           scrollWheelZoom={true}
           dragging={true}
           touchZoom={true}
           doubleClickZoom={true}
-          ref={mapRef}
         >
           <TileLayer
             attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png"
           />
-          <MapEvents onMapClick={handleMapClick} />
+          <MapComponent />
           {position && (
             <Marker position={[position.lat, position.lng]} icon={customIcon}>
               <Popup>Selected location</Popup>
