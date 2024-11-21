@@ -27,6 +27,7 @@ interface NominatimSearchResult {
 interface MapSelectionProps {
   onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
   onClose: () => void;
+  initialLocation?: { coordinates: Coordinates; name?: string };
 }
 
 interface MapEventsProps {
@@ -53,11 +54,16 @@ const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
 const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
+  initialLocation,
 }) => {
-  const [position, setPosition] = useState<Coordinates | null>(null);
-  const [locationName, setLocationName] = useState<string>("");
+  const [position, setPosition] = useState<Coordinates | null>(
+    initialLocation?.coordinates ?? null,
+  );
+  const [locationName, setLocationName] = useState<string>(
+    initialLocation?.name ?? "",
+  );
   const mapRef = useRef<LeafletMap | null>(null);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(initialLocation?.name ?? "");
   const [debouncedAddress] = useDebounce(address, 500);
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
@@ -65,17 +71,26 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-  const defaultPosition: LatLngExpression = [52.237049, 19.017532];
+  const defaultPosition: LatLngExpression = initialLocation
+    ? [initialLocation.coordinates.lat, initialLocation.coordinates.lng]
+    : [52.237049, 19.017532];
 
   const handleMapClick = (coords: Coordinates) => {
     setPosition(coords);
   };
 
   const handleSave = () => {
-    if (position && locationName) {
+    if (position) {
+      const locationToSave = {
+        coordinates: position,
+        name: locationName || "",
+      };
+
+      localStorage.setItem("savedLocation", JSON.stringify(locationToSave));
+
       onLocationSelect({
         ...position,
-        name: locationName,
+        name: locationName || "",
       });
     }
   };

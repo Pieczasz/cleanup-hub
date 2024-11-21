@@ -215,6 +215,30 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     },
   });
 
+  const getSavedLocation = () => {
+    const savedLocation = localStorage.getItem("savedLocation");
+    return savedLocation
+      ? (JSON.parse(savedLocation) as {
+          coordinates: Coordinates;
+          name?: string;
+        })
+      : null;
+  };
+
+  useEffect(() => {
+    const savedLocation = getSavedLocation();
+    if (savedLocation) {
+      const savedName = savedLocation.name ?? "";
+      setLocationName(savedName);
+      form.setValue("location.coordinates", savedLocation.coordinates);
+      form.setValue("location.name", savedName);
+    }
+  }, [form]);
+
+  const [initialLocation, setInitialLocation] = useState<
+    { coordinates: Coordinates; name?: string } | undefined
+  >(getSavedLocation() ?? undefined);
+
   useEffect(() => {
     if (debouncedAddress) {
       void handleAddressSearch(debouncedAddress);
@@ -277,10 +301,14 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     coordinates: Coordinates,
     name?: string,
   ): Promise<void> => {
+    const finalName = name ?? "";
+
     form.setValue("location.coordinates", coordinates);
-    form.setValue("location.name", name);
+    form.setValue("location.name", finalName);
     setSelectedCoordinates(coordinates);
-    setLocationName(name ?? "");
+    setLocationName(finalName);
+    setInitialLocation({ coordinates, name: finalName });
+
     try {
       const address = await fetchAddressFromCoordinates(
         coordinates.lat,
@@ -435,6 +463,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                       key={showMap ? "map" : undefined} // Only assign key if map is shown
                       onLocationSelect={handleMapLocationSelect}
                       onClose={() => setShowMap(false)}
+                      initialLocation={initialLocation}
                     />
                   </div>
                   <div></div>
