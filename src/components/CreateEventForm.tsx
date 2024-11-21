@@ -85,9 +85,13 @@ const formSchema = z.object({
     .min(10, "Description must be at least 10 characters")
     .max(2000, "Description must be less than 2000 characters"),
   location: z.object({
-    address: z.string(),
-    name: z.string().optional(),
-    coordinates: z.object({ lat: z.number(), lng: z.number() }),
+    address: z.string().optional(),
+    coordinates: z
+      .object({
+        lat: z.number(),
+        lng: z.number(),
+      })
+      .optional(),
   }),
 });
 
@@ -167,19 +171,12 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   const [selectedCoordinates, setSelectedCoordinates] =
     useState<Coordinates | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
-  const [name, setName] = useState("");
-  const [manualAddress, setManualAddress] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
   >([]);
-  const [previousMapLocation, setPreviousMapLocation] = useState<{
-    coordinates: Coordinates;
-    name: string;
-  } | null>(null);
 
-  const [debouncedAddress] = useDebounce(manualAddress, 500);
+  const [debouncedAddress] = useDebounce("", 500) as unknown as [string];
 
-  // TODO: Add redirection after adding an event
   const router = useRouter();
 
   const createEventMutation = api.post.createEvent.useMutation({
@@ -209,7 +206,6 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       description: "",
       type: "cleaning",
       location: {
-        name: "",
         address: "",
         coordinates: { lat: 0, lng: 0 },
       },
@@ -217,7 +213,6 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   });
 
   useEffect(() => {
-    console.log("Debounced Address:", debouncedAddress); // Log debounced address
     if (debouncedAddress) {
       void handleAddressSearch(debouncedAddress);
     } else {
@@ -251,7 +246,6 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   const handleSelectAddress = async (address: string): Promise<void> => {
     form.setValue("location.address", address);
     setSelectedAddress(address);
-    setManualAddress(address); // Update the manual address state
     try {
       const { lat, lng } = await fetchCoordinatesFromAddress(address);
       setSelectedCoordinates({ lat, lng });
@@ -268,56 +262,28 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       description: data.description,
       date: data.date,
       location: {
-        name: name || manualAddress, // Use map name or manual input
-        address: selectedAddress || manualAddress,
+        address: selectedAddress,
         coordinates: selectedCoordinates ?? { lat: 0, lng: 0 },
       },
-      type: data.type || "other",
+      type: data.type ?? "other",
     });
   };
 
   const handleMapLocationSelect = async (
-    locationData: Coordinates & { name?: string },
+    coordinates: Coordinates,
   ): Promise<void> => {
-    const { lat, lng, name = "" } = locationData;
-
-    setPreviousMapLocation({
-      coordinates: { lat, lng },
-      name: name,
-    });
-
-    // Update form and component state
-    setName(name);
-    setSelectedCoordinates({ lat, lng });
-    form.setValue("location.coordinates", { lat, lng });
-    form.setValue("location.name", name);
-
-    // Clear manual address input
-    setManualAddress("");
-
-    // Attempt to fetch address
+    form.setValue("location.coordinates", coordinates);
+    setSelectedCoordinates(coordinates);
     try {
-      const address = await fetchAddressFromCoordinates(lat, lng);
+      const address = await fetchAddressFromCoordinates(
+        coordinates.lat,
+        coordinates.lng,
+      );
       setSelectedAddress(address);
     } catch {
       setSelectedAddress("Unable to fetch address");
     }
-
     setShowMap(false);
-  };
-
-  const handleCloseMap = () => {
-    setShowMap(false);
-  };
-
-  const handleAddressChange = (value: string): void => {
-    if (previousMapLocation) {
-      setName(value);
-    }
-
-    setManualAddress(value); // Update manualAddress
-    setName(""); // Clear the name from the map selection if manually typing
-    setSelectedCoordinates(null); // Reset coordinates when typing manually
   };
 
   return (
@@ -417,9 +383,9 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
               <div className="flex items-center gap-4">
                 <FormControl>
                   <Input
-                    placeholder="Enter an address or use the map"
-                    value={name || manualAddress}
-                    onChange={(e) => handleAddressChange(e.target.value)} // Update manualAddress
+                    placeholder="Enter an address"
+                    {...form.register("location.address")}
+                    onChange={(e) => void handleAddressSearch(e.target.value)}
                   />
                 </FormControl>
                 <Button
@@ -459,9 +425,9 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                 <div className="w-full max-w-2xl rounded-lg bg-white p-4 shadow-md">
                   <div id="modal-map-container">
                     <MapWithNoSSR
-                      key={`map-${previousMapLocation?.coordinates?.lat}-${previousMapLocation?.coordinates?.lng}`}
+                      key={showMap ? "map" : undefined} // Only assign key if map is shown
                       onLocationSelect={handleMapLocationSelect}
-                      onClose={handleCloseMap}
+                      onClose={() => setShowMap(false)}
                     />
                   </div>
                   <div></div>
