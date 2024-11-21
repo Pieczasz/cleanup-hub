@@ -462,13 +462,6 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                       key={`map-${previousMapLocation?.coordinates?.lat}-${previousMapLocation?.coordinates?.lng}`}
                       onLocationSelect={handleMapLocationSelect}
                       onClose={handleCloseMap}
-                      initialPosition={
-                        previousMapLocation?.coordinates ?? {
-                          lat: 52.237049,
-                          lng: 19.017532,
-                        }
-                      }
-                      initialLocationName={previousMapLocation?.name ?? ""}
                     />
                   </div>
                   <div></div>

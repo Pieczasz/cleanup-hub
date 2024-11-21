@@ -20,8 +20,6 @@ interface Coordinates {
 interface MapSelectionProps {
   onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
   onClose: () => void;
-  initialPosition?: Coordinates;
-  initialLocationName?: string;
 }
 
 interface MapEventsProps {
@@ -48,17 +46,12 @@ const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
 const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
-  initialPosition = { lat: 52.237049, lng: 19.017532 },
-  initialLocationName = "",
 }) => {
-  const [position, setPosition] = useState<Coordinates>(
-    initialPosition
-      ? { ...initialPosition }
-      : { lat: 52.237049, lng: 19.017532 },
-  );
-  const [locationName, setLocationName] = useState<string>(
-    initialLocationName || "",
-  );
+  const [position, setPosition] = useState<Coordinates>({
+    lat: 52.237049,
+    lng: 19.017532,
+  });
+  const [locationName, setLocationName] = useState<string>("");
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -104,7 +97,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         }
       });
     };
-  }, [initialPosition]);
+  });
 
   return (
     <div className="flex flex-col gap-4" id="map-selection">
