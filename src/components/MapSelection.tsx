@@ -47,10 +47,9 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
 }) => {
-  const [position, setPosition] = useState<Coordinates>({
-    lat: 52.237049,
-    lng: 19.017532,
-  });
+  const [position, setPosition] = useState<Coordinates | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
+  const mapRef = useRef<LeafletMap | null>(null);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -59,33 +58,19 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   };
 
   const handleSave = () => {
-    if (position) {
+    if (position && locationName) {
       onLocationSelect({
         ...position,
+        name: locationName,
       });
     }
   };
-  const mapRef = useRef<LeafletMap | null>(null);
-
-  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
     }
-
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.invalidateSize();
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
-
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
       Array.from(mapContainers).forEach((container) => {
@@ -95,14 +80,12 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         }
       });
     };
-  });
+  }, []);
 
   return (
-    <div className="flex flex-col gap-4" id="map-selection">
+    <div className="flex flex-col gap-4">
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          key="map-selection"
-          id="map-selection"
           center={defaultPosition}
           zoom={6}
           className="h-full w-full rounded-lg"
@@ -124,7 +107,13 @@ const MapSelection: React.FC<MapSelectionProps> = ({
           )}
         </MapContainer>
       </div>
-
+      <Input
+        type="text"
+        placeholder="Enter location name (e.g., Local Park, Community Center)"
+        value={locationName}
+        onChange={(e) => setLocationName(e.target.value)}
+        className="w-full"
+      />
       <div className="flex flex-row items-center justify-end gap-x-4">
         <Button
           onClick={onClose}
@@ -136,7 +125,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         </Button>
         <Button
           onClick={handleSave}
-          disabled={!position}
+          disabled={!position || !locationName}
           className="rounded-3xl py-6 text-base text-white"
           type="button"
         >
