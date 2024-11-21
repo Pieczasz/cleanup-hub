@@ -11,6 +11,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "use-debounce";
 
 interface Coordinates {
   lat: number;
@@ -20,10 +21,18 @@ interface Coordinates {
 interface MapSelectionProps {
   onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
   onClose: () => void;
+  initialPosition?: Coordinates;
+  initialLocationName?: string;
 }
 
 interface MapEventsProps {
   onMapClick: (coords: Coordinates) => void;
+}
+
+interface NominatimSearchResult {
+  lat: string;
+  lon: string;
+  display_name: string;
 }
 
 const customIcon = L.icon({
@@ -46,16 +55,27 @@ const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
 const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
+  initialPosition = { lat: 52.237049, lng: 19.017532 },
+  initialLocationName = "",
 }) => {
-  const [position, setPosition] = useState<Coordinates | null>(null);
-  const [locationName, setLocationName] = useState<string>("");
+  const [position, setPosition] = useState<Coordinates | null>(
+    initialPosition ? { ...initialPosition } : null,
+  );
+  const [locationName, setLocationName] = useState<string>(initialLocationName);
   const mapRef = useRef<LeafletMap | null>(null);
+  const [address, setAddress] = useState("");
+  const [debouncedAddress] = useDebounce(address, 500);
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    NominatimSearchResult[]
+  >([]);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
   const handleMapClick = (coords: Coordinates) => {
     setPosition(coords);
   };
+
+  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const handleSave = () => {
     if (position && locationName) {
@@ -66,10 +86,60 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
   };
 
+  const handleAddressSearch = async (address: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          address,
+        )}&addressdetails=1&limit=5`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch address suggestions");
+      }
+
+      const data = (await response.json()) as NominatimSearchResult[];
+      setAddressSuggestions(data);
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+      setAddressSuggestions([]);
+    }
+  };
+
+  const handleSelectAddress = (suggestion: NominatimSearchResult) => {
+    const newPosition = {
+      lat: parseFloat(suggestion.lat),
+      lng: parseFloat(suggestion.lon),
+    };
+    setPosition(newPosition);
+    setLocationName(suggestion.display_name);
+    setAddress(suggestion.display_name);
+    setAddressSuggestions([]);
+
+    if (mapRef.current) {
+      mapRef.current.setView([newPosition.lat, newPosition.lng], 15);
+    }
+  };
+
+  useEffect(() => {
+    if (debouncedAddress) {
+      void handleAddressSearch(debouncedAddress);
+    } else {
+      setAddressSuggestions([]);
+    }
+  }, [debouncedAddress]);
+
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
+      if (initialPosition) {
+        mapRef.current.setView(
+          [initialPosition.lat, initialPosition.lng],
+          mapRef.current.getZoom(),
+        );
+      }
     }
+
     return () => {
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
@@ -80,10 +150,32 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         }
       });
     };
-  }, []);
+  }, [initialPosition]);
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Search for an address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="w-full"
+        />
+        {addressSuggestions.length > 0 && (
+          <div className="absolute z-[99999] mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+            {addressSuggestions.map((suggestion) => (
+              <div
+                key={`${suggestion.lat}-${suggestion.lon}`}
+                className="cursor-pointer p-2 hover:bg-gray-100"
+                onClick={() => handleSelectAddress(suggestion)}
+              >
+                {suggestion.display_name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
           center={defaultPosition}
@@ -97,8 +189,9 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         >
           <TileLayer
             attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png"
+            url={`https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token=${accessToken}`}
           />
+
           <MapEvents onMapClick={handleMapClick} />
           {position && (
             <Marker position={[position.lat, position.lng]} icon={customIcon}>
@@ -109,7 +202,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       </div>
       <Input
         type="text"
-        placeholder="Enter location name (e.g., Local Park, Community Center)"
+        placeholder="Enter location name (e.g., Local Park Gate, Community Center)"
         value={locationName}
         onChange={(e) => setLocationName(e.target.value)}
         className="w-full"

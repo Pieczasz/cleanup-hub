@@ -14,6 +14,8 @@ const OpenStreetMap: React.FC = () => {
 
   const mapInstanceRef = useRef<L.Map | null>(null);
 
+  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
@@ -52,7 +54,7 @@ const OpenStreetMap: React.FC = () => {
       >
         <TileLayer
           attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png"
+          url={`https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token=${accessToken}`}
         />
       </MapContainer>
     </div>
