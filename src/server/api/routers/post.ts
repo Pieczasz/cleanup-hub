@@ -26,6 +26,7 @@ export const postRouter = createTRPCRouter({
         date: z.date(),
         location: z.object({
           address: z.string(),
+          name: z.string().optional(),
           coordinates: z.object({ lat: z.number(), lng: z.number() }),
         }),
         type: z.enum(["cleaning", "treePlanting", "volunteering", "other"]),
@@ -50,7 +51,11 @@ export const postRouter = createTRPCRouter({
         title: input.title,
         date: input.date,
         description: input.description,
-        location: JSON.stringify(input.location),
+        location: JSON.stringify({
+          address: input.location.address,
+          name: input.location.name ?? "",
+          coordinates: input.location.coordinates,
+        }),
         type: input.type,
       });
 
