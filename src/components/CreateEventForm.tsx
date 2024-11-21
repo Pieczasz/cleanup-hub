@@ -284,6 +284,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   };
 
   const onSubmit = (data: FormSchema): void => {
+    localStorage.removeItem("savedLocation");
     createEventMutation.mutate({
       title: data.title,
       description: data.description,
@@ -301,7 +302,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     coordinates: Coordinates,
     name?: string,
   ): Promise<void> => {
-    const finalName = name ?? "";
+    const finalName = name ?? locationName ?? "";
 
     form.setValue("location.coordinates", coordinates);
     form.setValue("location.name", finalName);
@@ -419,8 +420,12 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                 <FormControl>
                   <Input
                     placeholder="Enter an address"
-                    {...form.register("location.address")}
-                    onChange={(e) => void handleAddressSearch(e.target.value)}
+                    value={selectedAddress}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedAddress(value);
+                      if (value) void handleAddressSearch(value);
+                    }}
                   />
                 </FormControl>
                 <Button

@@ -63,7 +63,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     initialLocation?.name ?? "",
   );
   const mapRef = useRef<LeafletMap | null>(null);
-  const [address, setAddress] = useState(initialLocation?.name ?? "");
+  const [address, setAddress] = useState("");
   const [debouncedAddress] = useDebounce(address, 500);
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
