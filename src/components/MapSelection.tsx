@@ -51,8 +51,10 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   initialPosition = { lat: 52.237049, lng: 19.017532 },
   initialLocationName = "",
 }) => {
-  const [position, setPosition] = useState<Coordinates | null>(
-    initialPosition ? { ...initialPosition } : null,
+  const [position, setPosition] = useState<Coordinates>(
+    initialPosition
+      ? { ...initialPosition }
+      : { lat: 52.237049, lng: 19.017532 },
   );
   const [locationName, setLocationName] = useState<string>(
     initialLocationName || "",
@@ -101,6 +103,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     <div className="flex flex-col gap-4">
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
+          key={`map`}
           center={defaultPosition}
           zoom={6}
           className="h-full w-full rounded-lg"
