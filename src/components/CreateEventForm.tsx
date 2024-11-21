@@ -217,6 +217,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   });
 
   useEffect(() => {
+    console.log("Debounced Address:", debouncedAddress); // Log debounced address
     if (debouncedAddress) {
       void handleAddressSearch(debouncedAddress);
     } else {
@@ -458,7 +459,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                 <div className="w-full max-w-2xl rounded-lg bg-white p-4 shadow-md">
                   <div id="modal-map-container">
                     <MapWithNoSSR
-                      key={`map-${Date.now()}`}
+                      key={showMap ? "map" : undefined} // Only assign key if map is shown
                       onLocationSelect={handleMapLocationSelect}
                       onClose={handleCloseMap}
                       initialPosition={
