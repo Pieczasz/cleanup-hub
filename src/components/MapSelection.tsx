@@ -59,7 +59,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   const [locationName, setLocationName] = useState<string>(
     initialLocationName || "",
   );
-  const mapRef = useRef<LeafletMap | null>(null);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -75,16 +74,26 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       });
     }
   };
+  const mapRef = useRef<LeafletMap | null>(null);
+  const mapDivRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
+    if (!mapDivRef.current) return;
+
     if (mapRef.current) {
       mapRef.current.invalidateSize();
-      if (initialPosition) {
-        mapRef.current.setView(
-          [initialPosition.lat, initialPosition.lng],
-          mapRef.current.getZoom(),
-        );
-      }
+    }
+    // Check if map already exists to avoid reuse
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current = L.map(mapDivRef.current).setView(
+        [51.505, -0.09],
+        13,
+      );
+
+      L.tileLayer("https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png").addTo(
+        mapInstanceRef.current,
+      );
     }
 
     return () => {
@@ -100,10 +109,14 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   }, [initialPosition]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="h-[400px] w-full rounded-lg border border-gray-200">
+    <div className="flex flex-col gap-4" id="map-selection">
+      <div
+        className="h-[400px] w-full rounded-lg border border-gray-200"
+        ref={mapDivRef}
+      >
         <MapContainer
-          key={`map`}
+          key={`map-selection`}
+          id="map-selection"
           center={defaultPosition}
           zoom={6}
           className="h-full w-full rounded-lg"
