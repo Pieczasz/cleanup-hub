@@ -6,7 +6,7 @@ import {
   useMapEvents,
   Popup,
 } from "react-leaflet";
-import type { Map as LeafletMap, LatLngExpression } from "leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,6 @@ interface MapSelectionProps {
   onClose: () => void;
   initialPosition?: Coordinates;
   initialLocationName?: string;
-}
-
-interface MapEventsProps {
-  onMapClick: (coords: Coordinates) => void;
 }
 
 interface NominatimSearchResult {
@@ -61,18 +57,20 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
   const mapInstanceRef = useRef<L.Map | null>(null);
 
-  const defaultPosition: LatLngExpression = [52.237049, 19.017532];
-
   const handleMapClick = (coords: Coordinates) => {
     setPosition(coords);
   };
 
   const handleSave = () => {
-    if (position && locationName) {
-      onLocationSelect({
-        ...position,
-        name: locationName,
-      });
+    try {
+      if (position && locationName) {
+        onLocationSelect({
+          ...position,
+          name: locationName,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving location:", error);
     }
   };
 
@@ -131,9 +129,11 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
 
       mapRef.current.remove();
+      mapRef.current = null;
     }
 
     return () => {

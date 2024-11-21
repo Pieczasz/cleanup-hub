@@ -458,7 +458,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                 <div className="w-full max-w-2xl rounded-lg bg-white p-4 shadow-md">
                   <div id="modal-map-container">
                     <MapWithNoSSR
-                      key={showMap ? "map" : undefined} // Only assign key if map is shown
+                      key={`map-${Date.now()}`}
                       onLocationSelect={handleMapLocationSelect}
                       onClose={handleCloseMap}
                       initialPosition={
