@@ -63,6 +63,8 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     NominatimSearchResult[]
   >([]);
 
+  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
   const handleMapClick = (coords: Coordinates) => {
@@ -174,7 +176,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         >
           <TileLayer
             attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png"
+            url={`https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token=${accessToken}`}
           />
           <MapEvents onMapClick={handleMapClick} />
           {position && (
