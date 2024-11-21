@@ -88,6 +88,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
     }
+
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -109,7 +110,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     <div className="flex flex-col gap-4" id="map-selection">
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          key="map-selection"
+          key={`${initialPosition.lat}-${initialPosition.lng}`}
           id="map-selection"
           center={defaultPosition}
           zoom={6}

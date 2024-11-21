@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 type Coordinates = {
@@ -9,13 +10,25 @@ type Coordinates = {
 
 const OpenStreetMap: React.FC = () => {
   const [center] = useState<Coordinates>({ lat: 52.237049, lng: 19.017532 });
-  const mapRef = useRef<L.Map | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
     }
+
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.invalidateSize();
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
     return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
       Array.from(mapContainers).forEach((container) => {
