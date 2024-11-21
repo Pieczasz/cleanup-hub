@@ -46,19 +46,27 @@ export const postRouter = createTRPCRouter({
         throw new Error("User not found");
       }
 
-      const event = await ctx.db.insert(events).values({
-        userId: user.id,
-        title: input.title,
-        date: input.date,
-        description: input.description,
-        location: JSON.stringify({
-          address: input.location.address,
-          name: input.location.name ?? "",
-          coordinates: input.location.coordinates,
-        }),
-        type: input.type,
-      });
+      // Insert the event and fetch the created record
+      const [event] = await ctx.db
+        .insert(events)
+        .values({
+          userId: user.id,
+          title: input.title,
+          date: input.date,
+          description: input.description,
+          location: JSON.stringify({
+            address: input.location.address,
+            name: input.location.name ?? "",
+            coordinates: input.location.coordinates,
+          }),
+          type: input.type,
+        })
+        .returning({ id: events.id }); // Use `.returning()` to get the `id`
 
-      return event;
+      if (!event) {
+        throw new Error("Failed to create the event");
+      }
+
+      return event; // Return the event object
     }),
 });

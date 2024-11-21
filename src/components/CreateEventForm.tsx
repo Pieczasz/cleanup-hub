@@ -182,14 +182,21 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   const router = useRouter();
 
   const createEventMutation = api.post.createEvent.useMutation({
-    onSuccess: (data: unknown) => {
-      if (typeof data === "object") {
+    onSuccess: (data) => {
+      if (data?.id) {
         toast({
           title: "Success!",
           description: "Event created successfully",
         });
+        // Redirect to the event page using the returned event ID
+        router.push(`/events/${data.id}`);
       } else {
-        console.error("Unexpected data shape:", data);
+        console.error("Unexpected data shape or missing event ID:", data);
+        toast({
+          title: "Error",
+          description: "Failed to fetch event details for redirection.",
+          variant: "destructive",
+        });
       }
     },
     onError: (error) => {
