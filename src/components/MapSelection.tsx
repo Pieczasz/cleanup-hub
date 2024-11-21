@@ -18,21 +18,19 @@ interface Coordinates {
   lng: number;
 }
 
-interface MapSelectionProps {
-  onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
-  onClose: () => void;
-  initialPosition?: Coordinates;
-  initialLocationName?: string;
-}
-
-interface MapEventsProps {
-  onMapClick: (coords: Coordinates) => void;
-}
-
 interface NominatimSearchResult {
   lat: string;
   lon: string;
   display_name: string;
+}
+
+interface MapSelectionProps {
+  onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
+  onClose: () => void;
+}
+
+interface MapEventsProps {
+  onMapClick: (coords: Coordinates) => void;
 }
 
 const customIcon = L.icon({
@@ -55,13 +53,9 @@ const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
 const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
-  initialPosition = { lat: 52.237049, lng: 19.017532 },
-  initialLocationName = "",
 }) => {
-  const [position, setPosition] = useState<Coordinates | null>(
-    initialPosition ? { ...initialPosition } : null,
-  );
-  const [locationName, setLocationName] = useState<string>(initialLocationName);
+  const [position, setPosition] = useState<Coordinates | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
   const mapRef = useRef<LeafletMap | null>(null);
   const [address, setAddress] = useState("");
   const [debouncedAddress] = useDebounce(address, 500);
@@ -74,8 +68,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   const handleMapClick = (coords: Coordinates) => {
     setPosition(coords);
   };
-
-  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const handleSave = () => {
     if (position && locationName) {
@@ -132,14 +124,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
-      if (initialPosition) {
-        mapRef.current.setView(
-          [initialPosition.lat, initialPosition.lng],
-          mapRef.current.getZoom(),
-        );
-      }
     }
-
     return () => {
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
@@ -150,7 +135,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         }
       });
     };
-  }, [initialPosition]);
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -189,9 +174,8 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         >
           <TileLayer
             attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url={`https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token=${accessToken}`}
+            url="https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png"
           />
-
           <MapEvents onMapClick={handleMapClick} />
           {position && (
             <Marker position={[position.lat, position.lng]} icon={customIcon}>
@@ -202,7 +186,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       </div>
       <Input
         type="text"
-        placeholder="Enter location name (e.g., Local Park Gate, Community Center)"
+        placeholder="Enter location name (e.g., Local Park, Community Center)"
         value={locationName}
         onChange={(e) => setLocationName(e.target.value)}
         className="w-full"
