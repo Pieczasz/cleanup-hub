@@ -49,11 +49,14 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   onLocationSelect,
   onClose,
   initialPosition = { lat: 52.237049, lng: 19.017532 },
+  initialLocationName = "",
 }) => {
   const [position, setPosition] = useState<Coordinates | null>(
     initialPosition ? { ...initialPosition } : null,
   );
-  const [locationName, setLocationName] = useState<string>("");
+  const [locationName, setLocationName] = useState<string>(
+    initialLocationName || "",
+  );
   const mapRef = useRef<LeafletMap | null>(null);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
