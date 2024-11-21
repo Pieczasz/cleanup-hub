@@ -136,6 +136,8 @@ const MapSelection: React.FC<MapSelectionProps> = ({
           mapRef.current.getZoom(),
         );
       }
+
+      mapRef.current = null;
     }
 
     return () => {

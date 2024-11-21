@@ -217,7 +217,6 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   });
 
   useEffect(() => {
-    console.log("Debounced Address:", debouncedAddress); // Log debounced address
     if (debouncedAddress) {
       void handleAddressSearch(debouncedAddress);
     } else {
