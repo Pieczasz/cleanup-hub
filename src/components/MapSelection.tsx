@@ -9,6 +9,8 @@ import {
 import type { Map as LeafletMap, LatLngExpression } from "leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Coordinates {
   lat: number;
@@ -16,14 +18,16 @@ interface Coordinates {
 }
 
 interface MapSelectionProps {
-  onLocationSelect: (coordinates: Coordinates) => void;
+  onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
+  onClose: () => void;
+  initialPosition?: Coordinates;
+  initialLocationName?: string;
 }
 
 interface MapEventsProps {
   onMapClick: (coords: Coordinates) => void;
 }
 
-// Custom marker icon setup
 const customIcon = L.icon({
   iconUrl: "/locationMarker.svg",
   iconSize: [24, 24],
@@ -31,7 +35,6 @@ const customIcon = L.icon({
   popupAnchor: [5, -25],
 });
 
-// MapEvents component to handle click events
 const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
   useMapEvents({
     click: (event) => {
@@ -42,11 +45,18 @@ const MapEvents: React.FC<MapEventsProps> = ({ onMapClick }) => {
   return null;
 };
 
-const MapSelection: React.FC<MapSelectionProps> = ({ onLocationSelect }) => {
-  const [position, setPosition] = useState<Coordinates | null>(null);
+const MapSelection: React.FC<MapSelectionProps> = ({
+  onLocationSelect,
+  onClose,
+  initialPosition = { lat: 52.237049, lng: 19.017532 },
+  initialLocationName = "",
+}) => {
+  const [position, setPosition] = useState<Coordinates | null>(
+    initialPosition ? { ...initialPosition } : null,
+  );
+  const [locationName, setLocationName] = useState<string>(initialLocationName);
   const mapRef = useRef<LeafletMap | null>(null);
 
-  // Set default position to center of Poland
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
   const handleMapClick = (coords: Coordinates) => {
@@ -54,18 +64,25 @@ const MapSelection: React.FC<MapSelectionProps> = ({ onLocationSelect }) => {
   };
 
   const handleSave = () => {
-    if (position) {
-      onLocationSelect(position);
+    if (position && locationName) {
+      onLocationSelect({
+        ...position,
+        name: locationName,
+      });
     }
   };
 
-  // Initialize map and handle resize
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.invalidateSize();
+      if (initialPosition) {
+        mapRef.current.setView(
+          [initialPosition.lat, initialPosition.lng],
+          mapRef.current.getZoom(),
+        );
+      }
     }
 
-    // Cleanup function for map instances
     return () => {
       const mapContainers =
         document.getElementsByClassName("leaflet-container");
@@ -76,7 +93,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({ onLocationSelect }) => {
         }
       });
     };
-  }, []);
+  }, [initialPosition]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,15 +120,30 @@ const MapSelection: React.FC<MapSelectionProps> = ({ onLocationSelect }) => {
           )}
         </MapContainer>
       </div>
-      <div className="flex justify-end">
-        <button
+      <Input
+        type="text"
+        placeholder="Enter location name (e.g., Local Park Gate, Community Center)"
+        value={locationName}
+        onChange={(e) => setLocationName(e.target.value)}
+        className="w-full"
+      />
+      <div className="flex flex-row items-center justify-end gap-x-4">
+        <Button
+          onClick={onClose}
+          variant="outline"
+          className="rounded-3xl py-6 text-base"
+          type="button"
+        >
+          Close Map
+        </Button>
+        <Button
           onClick={handleSave}
-          disabled={!position}
-          className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+          disabled={!position || !locationName}
+          className="rounded-3xl py-6 text-base text-white"
           type="button"
         >
           Save Location
-        </button>
+        </Button>
       </div>
     </div>
   );
