@@ -11,6 +11,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "use-debounce";
 
 interface Coordinates {
   lat: number;
@@ -26,6 +27,12 @@ interface MapSelectionProps {
 
 interface MapEventsProps {
   onMapClick: (coords: Coordinates) => void;
+}
+
+interface NominatimSearchResult {
+  lat: string;
+  lon: string;
+  display_name: string;
 }
 
 const customIcon = L.icon({
@@ -56,6 +63,11 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   );
   const [locationName, setLocationName] = useState<string>(initialLocationName);
   const mapRef = useRef<LeafletMap | null>(null);
+  const [address, setAddress] = useState("");
+  const [debouncedAddress] = useDebounce(address, 500);
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    NominatimSearchResult[]
+  >([]);
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -71,6 +83,49 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       });
     }
   };
+
+  const handleAddressSearch = async (address: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          address,
+        )}&addressdetails=1&limit=5`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch address suggestions");
+      }
+
+      const data = (await response.json()) as NominatimSearchResult[];
+      setAddressSuggestions(data);
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+      setAddressSuggestions([]);
+    }
+  };
+
+  const handleSelectAddress = (suggestion: NominatimSearchResult) => {
+    const newPosition = {
+      lat: parseFloat(suggestion.lat),
+      lng: parseFloat(suggestion.lon),
+    };
+    setPosition(newPosition);
+    setLocationName(suggestion.display_name);
+    setAddress(suggestion.display_name);
+    setAddressSuggestions([]);
+
+    if (mapRef.current) {
+      mapRef.current.setView([newPosition.lat, newPosition.lng], 15);
+    }
+  };
+
+  useEffect(() => {
+    if (debouncedAddress) {
+      void handleAddressSearch(debouncedAddress);
+    } else {
+      setAddressSuggestions([]);
+    }
+  }, [debouncedAddress]);
 
   useEffect(() => {
     if (mapRef.current) {
@@ -97,6 +152,28 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Search for an address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="w-full"
+        />
+        {addressSuggestions.length > 0 && (
+          <div className="absolute z-[99999] mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+            {addressSuggestions.map((suggestion) => (
+              <div
+                key={`${suggestion.lat}-${suggestion.lon}`}
+                className="cursor-pointer p-2 hover:bg-gray-100"
+                onClick={() => handleSelectAddress(suggestion)}
+              >
+                {suggestion.display_name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
           center={defaultPosition}
