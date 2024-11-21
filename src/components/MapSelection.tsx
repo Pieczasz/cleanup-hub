@@ -110,7 +110,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     <div className="flex flex-col gap-4" id="map-selection">
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          key={`${initialPosition.lat}-${initialPosition.lng}`}
+          key="map-selection"
           id="map-selection"
           center={defaultPosition}
           zoom={6}

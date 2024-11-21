@@ -14,7 +14,7 @@ const Events = () => {
 
   useEffect(() => {
     const openDialogHandler = () => {
-      setIsModalOpen(true); // Track modal state
+      setIsModalOpen(true);
       searchForEventsRef.current?.openHostEventDialog();
     };
 
