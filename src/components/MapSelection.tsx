@@ -51,7 +51,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     lat: 52.237049,
     lng: 19.017532,
   });
-  const [locationName, setLocationName] = useState<string>("");
 
   const defaultPosition: LatLngExpression = [52.237049, 19.017532];
 
@@ -60,10 +59,9 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   };
 
   const handleSave = () => {
-    if (position && locationName) {
+    if (position) {
       onLocationSelect({
         ...position,
-        name: locationName,
       });
     }
   };
@@ -126,13 +124,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
           )}
         </MapContainer>
       </div>
-      <Input
-        type="text"
-        placeholder="Enter location name (e.g., Local Park Gate, Community Center)"
-        value={locationName}
-        onChange={(e) => setLocationName(e.target.value)}
-        className="w-full"
-      />
+
       <div className="flex flex-row items-center justify-end gap-x-4">
         <Button
           onClick={onClose}
@@ -144,7 +136,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         </Button>
         <Button
           onClick={handleSave}
-          disabled={!position || !locationName}
+          disabled={!position}
           className="rounded-3xl py-6 text-base text-white"
           type="button"
         >
