@@ -94,6 +94,10 @@ const formSchema = z.object({
       })
       .optional(),
   }),
+  maxParticipants: z
+    .number()
+    .min(2, "Minimum 2 participants")
+    .max(10000, "Maximum 10,000 participants"),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -219,6 +223,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
         name: "",
         coordinates: { lat: 0, lng: 0 },
       },
+      maxParticipants: 10,
     },
   });
 
@@ -302,6 +307,7 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
         coordinates: selectedCoordinates ?? { lat: 0, lng: 0 },
       },
       type: data.type ?? "other",
+      maxParticipants: data.maxParticipants,
     });
   };
 
@@ -404,6 +410,27 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="maxParticipants"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Participants</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter max participants"
+                      min={2}
+                      max={10000}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="description"

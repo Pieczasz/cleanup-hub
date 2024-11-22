@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
+  json,
   pgTableCreator,
   primaryKey,
   text,
@@ -118,7 +119,8 @@ export const events = createTable(
     }).default(sql`CURRENT_TIMESTAMP`),
 
     type: varchar("type", { length: 255 }).notNull(),
-
+    maxParticipants: integer("max_participants"),
+    participants: json("participants").default([]),
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),

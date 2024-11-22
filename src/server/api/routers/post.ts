@@ -30,6 +30,10 @@ export const postRouter = createTRPCRouter({
           coordinates: z.object({ lat: z.number(), lng: z.number() }),
         }),
         type: z.enum(["cleaning", "treePlanting", "volunteering", "other"]),
+        maxParticipants: z
+          .number()
+          .min(1, "Minimum 1 participant")
+          .max(10000, "Maximum 10,000 participants"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -46,7 +50,7 @@ export const postRouter = createTRPCRouter({
         throw new Error("User not found");
       }
 
-      // Insert the event and fetch the created record
+      // Insert the event with maxParticipants
       const [event] = await ctx.db
         .insert(events)
         .values({
@@ -60,13 +64,15 @@ export const postRouter = createTRPCRouter({
             coordinates: input.location.coordinates,
           }),
           type: input.type,
+          maxParticipants: input.maxParticipants,
+          participants: [],
         })
-        .returning({ id: events.id }); // Use `.returning()` to get the `id`
+        .returning({ id: events.id });
 
       if (!event) {
         throw new Error("Failed to create the event");
       }
 
-      return event; // Return the event object
+      return event;
     }),
 });
