@@ -2,7 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
-  json,
+  jsonb,
   pgTableCreator,
   primaryKey,
   text,
@@ -112,21 +112,43 @@ export const events = createTable(
       .$defaultFn(() => crypto.randomUUID()),
     title: varchar("title", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
-    location: varchar("location", { length: 255 }).notNull(),
+    location: jsonb("location").notNull(),
     date: timestamp("date", {
       mode: "date",
       withTimezone: true,
     }).default(sql`CURRENT_TIMESTAMP`),
-
     type: varchar("type", { length: 255 }).notNull(),
     maxParticipants: integer("max_participants"),
-    participants: json("participants").default([]),
-    userId: varchar("userId", { length: 255 })
+    participantIds: jsonb("participant_ids").default([]),
+    creatorId: varchar("creator_id", { length: 255 })
       .notNull()
       .references(() => users.id),
   },
   (event) => ({
-    userIdIdx: index("event_user_id_idx").on(event.userId),
+    creatorIdIdx: index("event_creator_id_idx").on(event.creatorId),
     dateIdx: index("event_date_idx").on(event.date),
   }),
 );
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  creator: one(users, {
+    fields: [events.creatorId],
+    references: [users.id],
+  }),
+}));
+
+export type DBEvent = typeof events.$inferSelect;
+
+export type Event = {
+  id: string;
+  name: string;
+  location: {
+    address: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  participantsCount: number;
+  participantIds: string[];
+};

@@ -1,11 +1,10 @@
 import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { events } from "@/server/db/schema";
+import { events, type DBEvent, type Event } from "@/server/db/schema";
 
 export const postRouter = createTRPCRouter({
   getUserByEmail: publicProcedure
@@ -14,7 +13,6 @@ export const postRouter = createTRPCRouter({
       const user = await ctx.db.query.users.findFirst({
         where: (users, { eq }) => eq(users.email, input.email),
       });
-
       return user;
     }),
 
@@ -37,37 +35,24 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userEmail = ctx.session.user.email;
-      if (!userEmail) {
-        throw new Error("User email is not available");
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new Error("User ID is not available");
       }
 
-      const user = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.email, userEmail),
-      });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // Insert the event with maxParticipants
       const [event] = await ctx.db
         .insert(events)
         .values({
-          userId: user.id,
+          creatorId: userId,
           title: input.title,
           date: input.date,
           description: input.description,
-          location: JSON.stringify({
-            address: input.location.address,
-            name: input.location.name ?? "",
-            coordinates: input.location.coordinates,
-          }),
+          location: input.location,
           type: input.type,
           maxParticipants: input.maxParticipants,
-          participants: [],
+          participantIds: [userId], // Add the creator as the first participant
         })
-        .returning({ id: events.id });
+        .returning();
 
       if (!event) {
         throw new Error("Failed to create the event");
@@ -75,4 +60,23 @@ export const postRouter = createTRPCRouter({
 
       return event;
     }),
+
+  getEventsFromMostPopular: publicProcedure.query(async ({ ctx }) => {
+    const eventsData = await ctx.db.select().from(events);
+
+    return eventsData
+      .map((dbEvent: DBEvent): Event => {
+        return {
+          id: dbEvent.id,
+          name: dbEvent.title,
+          location: dbEvent.location as {
+            address: string;
+            coordinates: { lat: number; lng: number };
+          },
+          participantsCount: (dbEvent.participantIds as string[]).length,
+          participantIds: dbEvent.participantIds as string[],
+        };
+      })
+      .sort((a, b) => b.participantsCount - a.participantsCount);
+  }),
 });

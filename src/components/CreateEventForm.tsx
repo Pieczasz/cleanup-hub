@@ -190,9 +190,9 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       if (data?.id) {
         toast({
           title: "Success!",
-          description: "Event created successfully",
+          description:
+            "Event created successfully. You've been added as a participant.",
         });
-        // Redirect to the event page using the returned event ID
         router.push(`/events/${data.id}`);
       } else {
         console.error("Unexpected data shape or missing event ID:", data);
