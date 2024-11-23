@@ -25,6 +25,10 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     });
 
     if (response?.error) {
+      if (response.error === "CredentialsSignin") {
+        return { error: "Invalid Credentials" };
+      }
+
       return { error: response.error };
     }
 

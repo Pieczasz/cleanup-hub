@@ -140,8 +140,11 @@ export const eventsRelations = relations(events, ({ one }) => ({
 export type DBEvent = typeof events.$inferSelect;
 
 export type Event = {
+  description: string;
   id: string;
   name: string;
+  creatorId: string;
+  type: string;
   location: {
     address: string;
     coordinates: {
@@ -149,6 +152,7 @@ export type Event = {
       lng: number;
     };
   };
+  maxParticipants: number;
   participantsCount: number;
   participantIds: string[];
 };

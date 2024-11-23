@@ -13,6 +13,18 @@ export const postRouter = createTRPCRouter({
       const user = await ctx.db.query.users.findFirst({
         where: (users, { eq }) => eq(users.email, input.email),
       });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return user;
+    }),
+
+  getUserById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, input.id),
+      });
       return user;
     }),
 
@@ -69,14 +81,47 @@ export const postRouter = createTRPCRouter({
         return {
           id: dbEvent.id,
           name: dbEvent.title,
+          creatorId: dbEvent.creatorId,
+          type: dbEvent.type,
+          description: dbEvent.description,
           location: dbEvent.location as {
             address: string;
             coordinates: { lat: number; lng: number };
           },
+          maxParticipants: dbEvent.maxParticipants ?? 10,
           participantsCount: (dbEvent.participantIds as string[]).length,
           participantIds: dbEvent.participantIds as string[],
         };
       })
       .sort((a, b) => b.participantsCount - a.participantsCount);
   }),
+
+  getEventById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const dbEvent = await ctx.db.query.events.findFirst({
+        where: (events, { eq }) => eq(events.id, input.id),
+      });
+
+      if (!dbEvent) {
+        throw new Error("Event not found");
+      }
+
+      const event: Event = {
+        description: dbEvent.description,
+        id: dbEvent.id,
+        name: dbEvent.title,
+        creatorId: dbEvent.creatorId,
+        type: dbEvent.type,
+        location: dbEvent.location as {
+          address: string;
+          coordinates: { lat: number; lng: number };
+        },
+        maxParticipants: dbEvent.maxParticipants ?? 10,
+        participantsCount: (dbEvent.participantIds as string[]).length,
+        participantIds: dbEvent.participantIds as string[],
+      };
+
+      return event;
+    }),
 });

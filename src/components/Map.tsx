@@ -5,6 +5,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { api } from "@/trpc/react";
+import Link from "next/link";
+import Image from "next/image";
 
 const customIcon = L.icon({
   iconUrl: "/locationMarker.svg",
@@ -23,11 +25,14 @@ const OpenStreetMap: React.FC = () => {
 
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-  const {
-    data: events,
-    isLoading,
-    error,
-  } = api.post.getEventsFromMostPopular.useQuery();
+  const { data: events } = api.post.getEventsFromMostPopular.useQuery();
+
+  const { data: creator } = api.post.getUserById.useQuery(
+    {
+      id: events?.[0]?.creatorId ?? "", // Validate creatorId
+    },
+    { enabled: !!events?.[0]?.creatorId }, // Only enable if creatorId is valid
+  );
 
   useEffect(() => {
     if (mapRef.current) {
@@ -70,9 +75,37 @@ const OpenStreetMap: React.FC = () => {
             icon={customIcon}
           >
             <Popup>
-              <h3 className="font-semibold">{event.name}</h3>
-              <p>Location: {event.location.address}</p>
-              <p>Participants: {event.participantsCount}</p>
+              <div className="rounded-lg p-4">
+                <h3 className="mb-2 text-xl font-semibold text-gray-800">
+                  {event.name}
+                </h3>
+                <div className="mb-2 flex items-center">
+                  <Image
+                    src={creator?.image ?? "/defaultAvatar.jpg"}
+                    width={32}
+                    height={32}
+                    alt="Creator Avatar"
+                    className="mr-2 h-8 w-8 rounded-full"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {creator?.name ?? "Unknown"}
+                  </span>
+                </div>
+                <p className="mb-2 text-sm text-gray-600">
+                  Participants: {event.participantsCount}/
+                  {event.maxParticipants}
+                </p>
+                <p className="mb-2 text-sm text-gray-600">
+                  Event Type:{" "}
+                  {event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
+                </p>
+                <Link
+                  href={`/events/${event.id}`}
+                  className="text-base text-blue-500"
+                >
+                  Read More About This Event!
+                </Link>
+              </div>
             </Popup>
           </Marker>
         ))}
