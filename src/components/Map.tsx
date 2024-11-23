@@ -1,12 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-
-import { api } from "@/trpc/react";
+// Components
 import Link from "next/link";
 import Image from "next/image";
+
+// Functions
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { api } from "@/trpc/react";
+
+// Types
+import type { Map as LeafletMap } from "leaflet";
 
 const customIcon = L.icon({
   iconUrl: "/locationMarker.svg",
@@ -35,13 +39,10 @@ const OpenStreetMap: React.FC = () => {
           throw new Error("Geolocation is not supported by your browser");
         }
 
-        console.log("Requesting user location...");
-
         const position = await new Promise<GeolocationPosition>(
           (resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
               (pos) => {
-                console.log("Got position:", pos);
                 resolve(pos);
               },
               (err) => {
@@ -62,7 +63,6 @@ const OpenStreetMap: React.FC = () => {
           lng: position.coords.longitude,
         };
 
-        console.log("Setting new location:", newLocation);
         setUserLocation(newLocation);
       } catch (error) {
         const errorMessage =

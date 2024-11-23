@@ -221,4 +221,128 @@ export const postRouter = createTRPCRouter({
 
       return sortedEvents.slice(input.offset, input.offset + input.limit);
     }),
+  getNewestEvents: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const eventsData = await ctx.db.select().from(events);
+
+      return eventsData
+        .map((dbEvent: DBEvent): Event => {
+          return {
+            id: dbEvent.id,
+            name: dbEvent.title,
+            creatorId: dbEvent.creatorId,
+            type: dbEvent.type,
+            description: dbEvent.description,
+            date: dbEvent.date
+              ? dbEvent.date.toISOString().split("T")[0] +
+                " " +
+                dbEvent.date
+                  .toISOString()
+                  .split("T")[1]
+                  ?.split(":")
+                  .slice(0, 2)
+                  .join(":")
+              : "",
+            location: dbEvent.location as {
+              address: string;
+              coordinates: { lat: number; lng: number };
+            },
+            maxParticipants: dbEvent.maxParticipants ?? 10,
+            participantsCount: (dbEvent.participantIds as string[]).length,
+            participantIds: dbEvent.participantIds as string[],
+          };
+        })
+        .sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        })
+        .slice(input.offset, input.offset + input.limit);
+    }),
+  getUpcomingEvents: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const eventsData = await ctx.db.select().from(events);
+
+      return eventsData
+        .map((dbEvent: DBEvent): Event => {
+          return {
+            id: dbEvent.id,
+            name: dbEvent.title,
+            creatorId: dbEvent.creatorId,
+            type: dbEvent.type,
+            description: dbEvent.description,
+            date: dbEvent.date
+              ? dbEvent.date.toISOString().split("T")[0] +
+                " " +
+                dbEvent.date
+                  .toISOString()
+                  .split("T")[1]
+                  ?.split(":")
+                  .slice(0, 2)
+                  .join(":")
+              : "",
+            location: dbEvent.location as {
+              address: string;
+              coordinates: { lat: number; lng: number };
+            },
+            maxParticipants: dbEvent.maxParticipants ?? 10,
+            participantsCount: (dbEvent.participantIds as string[]).length,
+            participantIds: dbEvent.participantIds as string[],
+          };
+        })
+        .sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        })
+        .slice(input.offset, input.offset + input.limit);
+    }),
+  getMostPopularEvents: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const eventsData = await ctx.db.select().from(events);
+
+      return eventsData
+        .map((dbEvent: DBEvent): Event => {
+          return {
+            id: dbEvent.id,
+            name: dbEvent.title,
+            creatorId: dbEvent.creatorId,
+            type: dbEvent.type,
+            description: dbEvent.description,
+            date: dbEvent.date
+              ? dbEvent.date.toISOString().split("T")[0] +
+                " " +
+                dbEvent.date
+                  .toISOString()
+                  .split("T")[1]
+                  ?.split(":")
+                  .slice(0, 2)
+                  .join(":")
+              : "",
+            location: dbEvent.location as {
+              address: string;
+              coordinates: { lat: number; lng: number };
+            },
+            maxParticipants: dbEvent.maxParticipants ?? 10,
+            participantsCount: (dbEvent.participantIds as string[]).length,
+            participantIds: dbEvent.participantIds as string[],
+          };
+        })
+        .sort((a, b) => b.participantsCount - a.participantsCount)
+        .slice(input.offset, input.offset + input.limit);
+    }),
 });

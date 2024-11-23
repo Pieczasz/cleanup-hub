@@ -1,4 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+// Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+// Functions
+import { useEffect, useState, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -6,12 +11,13 @@ import {
   useMapEvents,
   Popup,
 } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
+
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useDebounce } from "use-debounce";
+
+// Types
+import type { Map as LeafletMap } from "leaflet";
 
 interface Coordinates {
   lat: number;
@@ -82,13 +88,10 @@ const MapSelection: React.FC<MapSelectionProps> = ({
           throw new Error("Geolocation is not supported by your browser");
         }
 
-        console.log("Requesting user location...");
-
         const position = await new Promise<GeolocationPosition>(
           (resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
               (pos) => {
-                console.log("Got position:", pos);
                 resolve(pos);
               },
               (err) => {
@@ -109,7 +112,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
           lng: position.coords.longitude,
         };
 
-        console.log("Setting new location:", newLocation);
         setUserLocation(newLocation);
       } catch (error) {
         const errorMessage =
