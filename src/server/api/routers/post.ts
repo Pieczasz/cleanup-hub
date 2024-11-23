@@ -5,6 +5,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { events, type DBEvent, type Event } from "@/server/db/schema";
+import { sql } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   getUserByEmail: publicProcedure
@@ -343,6 +344,51 @@ export const postRouter = createTRPCRouter({
           };
         })
         .sort((a, b) => b.participantsCount - a.participantsCount)
+        .slice(input.offset, input.offset + input.limit);
+    }),
+  searchEvents: publicProcedure
+    .input(
+      z.object({
+        searchTerm: z.string().min(3),
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(
+          sql`LOWER(${events.title}) LIKE LOWER(${"%" + input.searchTerm + "%"})`,
+        );
+
+      return eventsData
+        .map(
+          (dbEvent: DBEvent): Event => ({
+            id: dbEvent.id,
+            name: dbEvent.title,
+            creatorId: dbEvent.creatorId,
+            type: dbEvent.type,
+            description: dbEvent.description,
+            date: dbEvent.date
+              ? dbEvent.date.toISOString().split("T")[0] +
+                " " +
+                dbEvent.date
+                  .toISOString()
+                  .split("T")[1]
+                  ?.split(":")
+                  .slice(0, 2)
+                  .join(":")
+              : "",
+            location: dbEvent.location as {
+              address: string;
+              coordinates: { lat: number; lng: number };
+            },
+            maxParticipants: dbEvent.maxParticipants ?? 10,
+            participantsCount: (dbEvent.participantIds as string[]).length,
+            participantIds: dbEvent.participantIds as string[],
+          }),
+        )
         .slice(input.offset, input.offset + input.limit);
     }),
 });

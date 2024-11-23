@@ -14,15 +14,12 @@ import { Input } from "@/components/ui/input";
 // Functions
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
 // Hooks
 import { toast } from "@/hooks/use-toast";
-
+import { useDebounce } from "use-debounce";
 // Types
 import type { Event } from "@/server/db/schema";
 import {
@@ -34,12 +31,7 @@ import {
 } from "./ui/dialog";
 import { CreateEventForm } from "./CreateEventForm";
 
-const FormSchema = z.object({
-  title: z.string().optional(),
-  groupBy: z
-    .enum(["Closest", "Newest", "Upcoming", "MostPopular"])
-    .default("Closest"),
-});
+// Remove FormSchema since we don't need it anymore
 
 export interface SearchForEventsRef {
   openHostEventDialog: () => void;
@@ -67,20 +59,13 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch] = useDebounce(searchInput, 300);
   const router = useRouter();
   const session = useSession();
-
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      title: "",
-      groupBy: "Closest",
-    },
-  });
-
-  const { watch } = form;
-  const groupBy = watch("groupBy");
+  const [groupBy, setGroupBy] = useState<
+    "Closest" | "Newest" | "Upcoming" | "MostPopular"
+  >("Closest");
 
   // TRPC queries for different grouping options
   const closestEventsQuery = api.post.getClosestEvents.useQuery(
@@ -123,6 +108,11 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
     {
       enabled: groupBy === "MostPopular",
     },
+  );
+
+  const searchQuery = api.post.searchEvents.useQuery(
+    { searchTerm: debouncedSearch, limit: ITEMS_PER_PAGE, offset: 0 },
+    { enabled: debouncedSearch.length >= 3 },
   );
 
   // Fetch user location on mount
@@ -174,66 +164,57 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
     }
   }, [isDialogOpen, session, router]);
 
-  // Update events based on the selected grouping option
+  // Update events based on the selected grouping option and search term
   useEffect(() => {
     setIsLoading(true);
     let currentEvents: Event[] | undefined;
 
-    switch (groupBy) {
-      case "Closest":
-        currentEvents = closestEventsQuery.data;
-        break;
-      case "Newest":
-        currentEvents = newestEventsQuery.data;
-        break;
-      case "Upcoming":
-        currentEvents = upcomingEventsQuery.data;
-        break;
-      case "MostPopular":
-        currentEvents = mostPopularEventsQuery.data;
-        break;
+    if (debouncedSearch.length >= 3) {
+      currentEvents = searchQuery.data;
+    } else {
+      switch (groupBy) {
+        case "Closest":
+          currentEvents = closestEventsQuery.data;
+          break;
+        case "Newest":
+          currentEvents = newestEventsQuery.data;
+          break;
+        case "Upcoming":
+          currentEvents = upcomingEventsQuery.data;
+          break;
+        case "MostPopular":
+          currentEvents = mostPopularEventsQuery.data;
+          break;
+      }
     }
 
     if (currentEvents) {
-      // Filter events by search term if one exists
-      const filteredEvents = searchTerm
-        ? currentEvents.filter((event) =>
-            event.name.toLowerCase().includes(searchTerm.toLowerCase()),
-          )
-        : currentEvents;
-
-      setEvents(filteredEvents);
+      setEvents(currentEvents);
     }
     setIsLoading(false);
   }, [
     groupBy,
-    searchTerm,
+    debouncedSearch,
+    searchQuery.data,
     closestEventsQuery.data,
     newestEventsQuery.data,
     upcomingEventsQuery.data,
     mostPopularEventsQuery.data,
   ]);
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setSearchTerm(data.title ?? "");
-  };
-
   return (
     <div className="flex w-full flex-col gap-y-4">
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-wrap items-center gap-4"
-      >
+      <div className="flex flex-wrap items-center gap-4">
         <Input
-          {...form.register("title")}
-          placeholder="Event Title"
+          placeholder="Search events (min. 3 characters)"
           className="min-w-[35%] flex-1 rounded-3xl py-6"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
         <Select
-          defaultValue={form.getValues("groupBy")}
+          value={groupBy}
           onValueChange={(value) =>
-            form.setValue(
-              "groupBy",
+            setGroupBy(
               value as "Closest" | "Newest" | "Upcoming" | "MostPopular",
             )
           }
@@ -251,10 +232,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Button type="submit" className="rounded-3xl py-6">
-          Search
-        </Button>
-      </form>
+      </div>
       <div className="mt-4 flex w-full items-center justify-center">
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
