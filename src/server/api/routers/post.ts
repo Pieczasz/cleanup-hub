@@ -144,4 +144,81 @@ export const postRouter = createTRPCRouter({
 
       return event;
     }),
+  getClosestEvents: publicProcedure
+    .input(
+      z.object({
+        lat: z.number(),
+        lng: z.number(),
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const eventsData = await ctx.db.select().from(events);
+
+      const calculateDistance = (
+        lat1: number,
+        lng1: number,
+        lat2: number,
+        lng2: number,
+      ) => {
+        const toRad = (value: number) => (value * Math.PI) / 180;
+        const R = 6371; // Radius of the Earth in km
+        const dLat = toRad(lat2 - lat1);
+        const dLng = toRad(lng2 - lng1);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      };
+
+      const sortedEvents = eventsData
+        .map((dbEvent: DBEvent): Event => {
+          return {
+            id: dbEvent.id,
+            name: dbEvent.title,
+            creatorId: dbEvent.creatorId,
+            type: dbEvent.type,
+            description: dbEvent.description,
+            date: dbEvent.date
+              ? dbEvent.date.toISOString().split("T")[0] +
+                " " +
+                dbEvent.date
+                  .toISOString()
+                  .split("T")[1]
+                  ?.split(":")
+                  .slice(0, 2)
+                  .join(":")
+              : "",
+            location: dbEvent.location as {
+              address: string;
+              coordinates: { lat: number; lng: number };
+            },
+            maxParticipants: dbEvent.maxParticipants ?? 10,
+            participantsCount: (dbEvent.participantIds as string[]).length,
+            participantIds: dbEvent.participantIds as string[],
+            distance: calculateDistance(
+              input.lat,
+              input.lng,
+              (
+                dbEvent.location as {
+                  coordinates: { lat: number; lng: number };
+                }
+              ).coordinates.lat,
+              (
+                dbEvent.location as {
+                  coordinates: { lat: number; lng: number };
+                }
+              ).coordinates.lng,
+            ),
+          };
+        })
+        .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+
+      return sortedEvents.slice(input.offset, input.offset + input.limit);
+    }),
 });

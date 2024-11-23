@@ -6,7 +6,7 @@ import {
   useMapEvents,
   Popup,
 } from "react-leaflet";
-import type { Map as LeafletMap, LatLngExpression } from "leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -69,11 +69,72 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     NominatimSearchResult[]
   >([]);
 
-  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [zoom, setZoom] = useState(6);
+  const defaultCenter: Coordinates = { lat: 52.237049, lng: 19.017532 };
+  const [center, setCenter] = useState(defaultCenter);
 
-  const defaultPosition: LatLngExpression = initialLocation
-    ? [initialLocation.coordinates.lat, initialLocation.coordinates.lng]
-    : [52.237049, 19.017532];
+  // Separate useEffect for initial location request
+  useEffect(() => {
+    const getUserLocation = async () => {
+      try {
+        if (!navigator.geolocation) {
+          throw new Error("Geolocation is not supported by your browser");
+        }
+
+        console.log("Requesting user location...");
+
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                console.log("Got position:", pos);
+                resolve(pos);
+              },
+              (err) => {
+                console.error("Geolocation error:", err);
+                reject(new Error(err.message));
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+              },
+            );
+          },
+        );
+
+        const newLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+
+        console.log("Setting new location:", newLocation);
+        setUserLocation(newLocation);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        console.error("Error in getUserLocation:", errorMessage);
+      }
+    };
+
+    void getUserLocation();
+  }, []);
+
+  // New useEffect to handle map updates when user location changes
+  useEffect(() => {
+    if (userLocation) {
+      setCenter(userLocation);
+      setZoom(10);
+
+      // If the map reference exists, we can also programmatically update it
+      if (mapRef.current) {
+        mapRef.current.setView([userLocation.lat, userLocation.lng], 12);
+      }
+    }
+  }, [userLocation]);
+
+  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const handleMapClick = (coords: Coordinates) => {
     setPosition(coords);
@@ -180,8 +241,8 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       </div>
       <div className="h-[400px] w-full rounded-lg border border-gray-200">
         <MapContainer
-          center={defaultPosition}
-          zoom={6}
+          center={center}
+          zoom={zoom}
           className="h-full w-full rounded-lg"
           scrollWheelZoom={true}
           dragging={true}

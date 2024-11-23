@@ -156,4 +156,5 @@ export type Event = {
   maxParticipants: number;
   participantsCount: number;
   participantIds: string[];
+  distance?: number;
 };

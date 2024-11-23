@@ -45,10 +45,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
 
 const FormSchema = z.object({
   title: z.string().optional(),
-  groupBy: z.enum(["closest", "newest", "upcoming", "mostPopular"]).optional(),
+  groupBy: z.enum(["Closest", "Newest", "Upcoming", "MostPopular"]).optional(),
 });
 
 export interface SearchForEventsRef {
@@ -59,6 +60,38 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   const router = useRouter();
+
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        },
+      );
+    }
+  }, []);
+
+  const { data: events, error } = api.post.getClosestEvents.useQuery({
+    lat: userLocation?.lat ?? 0,
+    lng: userLocation?.lng ?? 0,
+  });
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching events:", error);
+    }
+  }, [error]);
 
   useImperativeHandle(ref, () => ({
     openHostEventDialog: () => {
@@ -72,7 +105,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       title: "",
-      groupBy: "closest",
+      groupBy: "Closest",
     },
   });
 
@@ -134,14 +167,14 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Group By</SelectLabel>
-                          <SelectItem value="closest">
+                          <SelectItem value="Closest">
                             Closest Events
                           </SelectItem>
-                          <SelectItem value="newest">Newest Events</SelectItem>
-                          <SelectItem value="upcoming">
+                          <SelectItem value="Newest">Newest Events</SelectItem>
+                          <SelectItem value="Upcoming">
                             Upcoming Events
                           </SelectItem>
-                          <SelectItem value="mostPopular">
+                          <SelectItem value="MostPopular">
                             Most Popular Events
                           </SelectItem>
                         </SelectGroup>
@@ -185,7 +218,8 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
 
           <h4 className="text-xl font-semibold">Filters</h4>
         </div>
-        <div className="flex flex-col lg:w-3/4"></div>
+        <div className="h-full w-1 border-l-2 border-slate-400" />
+        {/* <div className="flex flex-col lg:w-3/4">Events display</div> */}
       </div>
     </div>
   );
