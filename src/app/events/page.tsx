@@ -43,7 +43,7 @@ const Events = () => {
               <CreateEventForm onClose={() => setIsModalOpen(false)} />
             </div>
           )}
-          <div>
+          <div className="w-full">
             <SearchForEvents ref={searchForEventsRef} />
           </div>
         </div>

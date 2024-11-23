@@ -25,6 +25,14 @@ import { toast } from "@/hooks/use-toast";
 
 // Types
 import type { Event } from "@/server/db/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { CreateEventForm } from "./CreateEventForm";
 
 const FormSchema = z.object({
   title: z.string().optional(),
@@ -43,6 +51,16 @@ type Coordinates = {
 };
 
 const ITEMS_PER_PAGE = 20;
+
+const formatEventType = (type: string) => {
+  const typeMap: Record<string, string> = {
+    treePlanting: "Tree Planting",
+    cleaning: "Cleaning",
+    volunteering: "Volunteering",
+    other: "Other",
+  };
+  return typeMap[type] ?? type;
+};
 
 const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -204,12 +222,12 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
     <div className="flex w-full flex-col gap-y-4">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-y-4 lg:flex-row lg:gap-x-8"
+        className="flex flex-wrap items-center gap-4"
       >
         <Input
           {...form.register("title")}
           placeholder="Event Title"
-          className="rounded-3xl py-6 lg:min-w-[450px]"
+          className="min-w-[35%] flex-1 rounded-3xl py-6"
         />
         <Select
           defaultValue={form.getValues("groupBy")}
@@ -220,7 +238,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
             )
           }
         >
-          <SelectTrigger className="rounded-3xl py-6 lg:w-[180px]">
+          <SelectTrigger className="w-[30%] rounded-3xl py-6">
             <SelectValue placeholder="Group By" />
           </SelectTrigger>
           <SelectContent>
@@ -237,6 +255,26 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           Search
         </Button>
       </form>
+      <div className="mt-4 flex w-full items-center justify-center">
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-1/2 rounded-3xl py-6 text-lg text-white lg:w-1/4">
+              Host an Event
+            </Button>
+          </DialogTrigger>
+          <DialogContent
+            className="max-h-[90vh] max-w-[800px] overflow-hidden p-0"
+            aria-describedby="create-event-dialog-description"
+          >
+            <DialogHeader className="ml-4 mt-4">
+              <DialogTitle>Create New Event</DialogTitle>
+            </DialogHeader>
+            <div id="create-event-dialog-description">
+              <CreateEventForm onClose={() => setDialogOpen(false)} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       <div className="mt-4">
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -264,7 +302,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
                 <p className="mt-2 text-gray-600">{event.description}</p>
                 <div className="mt-2 flex gap-x-4 text-sm text-gray-500">
                   <span>{event.date}</span>
-                  <span>Type: {event.type}</span>
+                  <span>Type: {formatEventType(event.type)}</span>
                   {groupBy === "Closest" && event.distance && (
                     <span>{event.distance.toFixed(1)} km away</span>
                   )}

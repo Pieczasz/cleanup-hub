@@ -259,7 +259,7 @@ export const postRouter = createTRPCRouter({
           };
         })
         .sort((a, b) => {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
         })
         .slice(input.offset, input.offset + input.limit);
     }),
