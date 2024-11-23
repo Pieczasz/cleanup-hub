@@ -145,6 +145,7 @@ export type Event = {
   name: string;
   creatorId: string;
   type: string;
+  date: string;
   location: {
     address: string;
     coordinates: {

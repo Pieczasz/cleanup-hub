@@ -1,12 +1,16 @@
 "use client";
 
+// Components
+import PageLayout from "@/components/PageLayout";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+
+// Functions
 import { useEffect, useState } from "react";
 import { notFound } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
-import React from "react";
-import PageLayout from "@/components/PageLayout";
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+
+// Types
 import type { Event } from "@/server/db/schema";
 
 interface PostPageProps {
@@ -16,11 +20,11 @@ interface PostPageProps {
 }
 
 const EventPage = ({ params }: PostPageProps) => {
-  const [slug, setSlug] = React.useState<string | null>(null);
-  const [isSlugResolved, setIsSlugResolved] = React.useState(false);
+  const [slug, setSlug] = useState<string | null>(null);
+  const [isSlugResolved, setIsSlugResolved] = useState(false);
 
-  // Unwrap the params Promise and set the slug
-  React.useEffect(() => {
+  // Unwrap the params Promise and set the slug. This is because getting slug directly without promise will not work in future versions of Next.js
+  useEffect(() => {
     params
       .then((resolvedParams) => {
         setSlug(resolvedParams.slug?.join(""));
@@ -45,20 +49,21 @@ const EventPage = ({ params }: PostPageProps) => {
   // Redirect to 404 if no event is found and not loading
   if (isSlugResolved && !isLoading && !event) {
     notFound();
-    return null; // Add return to avoid further rendering
   }
 
   return (
     <PageLayout>
       <MaxWidthWrapper>
         {isLoading ? (
-          <div>Loading...</div>
+          <div></div>
         ) : error ? (
-          <p className="text-red-500">Error loading event details</p>
+          <p className="text-center text-xl font-semibold text-red-500">
+            Error loading event details
+          </p>
         ) : (
           event && (
             <div>
-              <h1 className="text-xl font-bold">{event.name}</h1>
+              <h2 className="text-2xl font-bold">{event.name}</h2>
               <p className="mt-2">{event.description}</p>
               {/* Uncomment and implement the handleJoinEvent function if required */}
               {/* <button onClick={handleJoinEvent}>Join Event</button> */}

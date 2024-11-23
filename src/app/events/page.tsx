@@ -1,12 +1,16 @@
 "use client";
-import { CreateEventForm } from "@/components/CreateEventForm";
-import dynamic from "next/dynamic";
 
+// Components
+import { CreateEventForm } from "@/components/CreateEventForm";
+
+import dynamic from "next/dynamic";
 const OpenStreetMap = dynamic(() => import("@/components/Map"), { ssr: false });
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import PageLayout from "@/components/PageLayout";
 import SearchForEvents from "@/components/SearchForEvents";
-import React, { useEffect, useRef, useState } from "react";
+
+// Functions
+import { useEffect, useRef, useState } from "react";
 
 const Events = () => {
   const searchForEventsRef = useRef<{ openHostEventDialog: () => void }>(null);

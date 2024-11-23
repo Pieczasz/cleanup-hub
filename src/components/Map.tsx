@@ -96,9 +96,10 @@ const OpenStreetMap: React.FC = () => {
                   {event.maxParticipants}
                 </p>
                 <p className="mb-2 text-sm text-gray-600">
-                  Event Type:{" "}
+                  Type:{" "}
                   {event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
                 </p>
+                <p>Date: {event.date}</p>
                 <Link
                   href={`/events/${event.id}`}
                   className="text-base text-blue-500"
