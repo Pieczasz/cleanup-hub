@@ -44,16 +44,6 @@ type Coordinates = {
 
 const ITEMS_PER_PAGE = 20;
 
-const formatEventType = (type: string) => {
-  const typeMap: Record<string, string> = {
-    treePlanting: "Tree Planting",
-    cleaning: "Cleaning",
-    volunteering: "Volunteering",
-    other: "Other",
-  };
-  return typeMap[type] ?? type;
-};
-
 const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -256,7 +246,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
       <div className="mt-4">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <p className="text-gray-500">Loading events...</p>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
           </div>
         ) : events.length === 0 ? (
           <div className="flex justify-center py-8">
@@ -280,7 +270,13 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
                 <p className="mt-2 text-gray-600">{event.description}</p>
                 <div className="mt-2 flex gap-x-4 text-sm text-gray-500">
                   <span>{event.date}</span>
-                  <span>Type: {formatEventType(event.type)}</span>
+                  <span>
+                    Type:{" "}
+                    {event.type === "treePlanting"
+                      ? "Tree Planting"
+                      : event.type[0]?.toLocaleUpperCase() +
+                        event.type.slice(1)}
+                  </span>
                   {groupBy === "Closest" && event.distance && (
                     <span>{event.distance.toFixed(1)} km away</span>
                   )}

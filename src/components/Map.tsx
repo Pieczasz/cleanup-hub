@@ -140,9 +140,7 @@ const OpenStreetMap: React.FC = () => {
           >
             <Popup>
               <div className="rounded-lg p-4">
-                <h3 className="mb-2 text-xl font-semibold text-gray-800">
-                  {event.name}
-                </h3>
+                <h3 className="mb-2 text-xl font-semibold">{event.name}</h3>
                 <div className="mb-2 flex items-center">
                   <Image
                     src={creator?.image ?? "/defaultAvatar.jpg"}
@@ -151,17 +149,19 @@ const OpenStreetMap: React.FC = () => {
                     alt="Creator Avatar"
                     className="mr-2 h-8 w-8 rounded-full"
                   />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium">
                     {creator?.name ?? "Unknown"}
                   </span>
                 </div>
-                <p className="mb-2 text-sm text-gray-600">
+                <p className="mb-2 text-sm">
                   Participants: {event.participantsCount}/
                   {event.maxParticipants}
                 </p>
-                <p className="mb-2 text-sm text-gray-600">
+                <p className="mb-2 text-sm">
                   Type:{" "}
-                  {event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
+                  {event.type === "treePlanting"
+                    ? "Tree Planting"
+                    : event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
                 </p>
                 <p>Date: {event.date}</p>
                 <Link

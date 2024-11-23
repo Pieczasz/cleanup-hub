@@ -147,6 +147,7 @@ export type Event = {
   type: string;
   date: string;
   location: {
+    name: string;
     address: string;
     coordinates: {
       lat: number;

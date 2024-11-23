@@ -96,6 +96,7 @@ export const postRouter = createTRPCRouter({
                 .join(":")
             : "",
           location: dbEvent.location as {
+            name: string;
             address: string;
             coordinates: { lat: number; lng: number };
           },
@@ -135,6 +136,7 @@ export const postRouter = createTRPCRouter({
               .join(":")
           : "",
         location: dbEvent.location as {
+          name: string;
           address: string;
           coordinates: { lat: number; lng: number };
         },
@@ -196,6 +198,7 @@ export const postRouter = createTRPCRouter({
                   .join(":")
               : "",
             location: dbEvent.location as {
+              name: string;
               address: string;
               coordinates: { lat: number; lng: number };
             },
@@ -251,6 +254,7 @@ export const postRouter = createTRPCRouter({
                   .join(":")
               : "",
             location: dbEvent.location as {
+              name: string;
               address: string;
               coordinates: { lat: number; lng: number };
             },
@@ -293,6 +297,7 @@ export const postRouter = createTRPCRouter({
                   .join(":")
               : "",
             location: dbEvent.location as {
+              name: string;
               address: string;
               coordinates: { lat: number; lng: number };
             },
@@ -335,6 +340,7 @@ export const postRouter = createTRPCRouter({
                   .join(":")
               : "",
             location: dbEvent.location as {
+              name: string;
               address: string;
               coordinates: { lat: number; lng: number };
             },
@@ -381,6 +387,7 @@ export const postRouter = createTRPCRouter({
                   .join(":")
               : "",
             location: dbEvent.location as {
+              name: string;
               address: string;
               coordinates: { lat: number; lng: number };
             },
@@ -390,5 +397,75 @@ export const postRouter = createTRPCRouter({
           }),
         )
         .slice(input.offset, input.offset + input.limit);
+    }),
+
+  joinEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const event = await ctx.db.query.events.findFirst({
+        where: (events, { eq }) => eq(events.id, input.eventId),
+      });
+
+      if (!event) throw new Error("Event not found");
+
+      const participantIds = event.participantIds as string[];
+      if (participantIds.includes(userId)) {
+        throw new Error("Already joined this event");
+      }
+
+      const [updatedEvent] = await ctx.db
+        .update(events)
+        .set({
+          participantIds: [...participantIds, userId],
+        })
+        .where(sql`id = ${input.eventId}`)
+        .returning();
+
+      return updatedEvent;
+    }),
+
+  leaveEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const event = await ctx.db.query.events.findFirst({
+        where: (events, { eq }) => eq(events.id, input.eventId),
+      });
+
+      if (!event) throw new Error("Event not found");
+
+      const participantIds = event.participantIds as string[];
+      if (!participantIds.includes(userId)) {
+        throw new Error("Not joined this event");
+      }
+
+      const [updatedEvent] = await ctx.db
+        .update(events)
+        .set({
+          participantIds: participantIds.filter((id) => id !== userId),
+        })
+        .where(sql`id = ${input.eventId}`)
+        .returning();
+
+      return updatedEvent;
+    }),
+
+  deleteEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const event = await ctx.db.query.events.findFirst({
+        where: (events, { eq }) => eq(events.id, input.eventId),
+      });
+
+      if (!event) throw new Error("Event not found");
+      if (event.creatorId !== userId) {
+        throw new Error("Only the event creator can delete this event");
+      }
+
+      await ctx.db.delete(events).where(sql`id = ${input.eventId}`);
+
+      return { success: true };
     }),
 });

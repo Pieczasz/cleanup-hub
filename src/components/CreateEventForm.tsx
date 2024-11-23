@@ -296,6 +296,15 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
   };
 
   const onSubmit = (data: FormSchema): void => {
+    if (!selectedAddress || !selectedCoordinates) {
+      toast({
+        title: "Error",
+        description: "Please select a location with a valid address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     localStorage.removeItem("savedLocation");
     createEventMutation.mutate({
       title: data.title,
@@ -303,35 +312,33 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       date: data.date,
       location: {
         address: selectedAddress,
-        name: locationName,
-        coordinates: selectedCoordinates ?? { lat: 0, lng: 0 },
+        name:
+          (locationName || data.location.name) ?? selectedAddress.split(",")[0],
+        coordinates: selectedCoordinates,
       },
       type: data.type ?? "other",
       maxParticipants: data.maxParticipants,
     });
   };
 
-  const handleMapLocationSelect = async (
-    coordinates: Coordinates,
-    name?: string,
-  ): Promise<void> => {
+  const handleMapLocationSelect = async (location: {
+    lat: number;
+    lng: number;
+    name?: string;
+    address?: string;
+  }): Promise<void> => {
+    const { lat, lng, name, address } = location;
+    const coordinates = { lat, lng };
     const finalName = name ?? locationName ?? "";
+    const finalAddress = address ?? selectedAddress ?? "";
 
     form.setValue("location.coordinates", coordinates);
     form.setValue("location.name", finalName);
+    form.setValue("location.address", finalAddress);
     setSelectedCoordinates(coordinates);
     setLocationName(finalName);
+    setSelectedAddress(finalAddress);
     setInitialLocation({ coordinates, name: finalName });
-
-    try {
-      const address = await fetchAddressFromCoordinates(
-        coordinates.lat,
-        coordinates.lng,
-      );
-      setSelectedAddress(address);
-    } catch {
-      setSelectedAddress("Unable to fetch address");
-    }
     setShowMap(false);
   };
 

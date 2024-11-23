@@ -30,8 +30,22 @@ interface NominatimSearchResult {
   display_name: string;
 }
 
+interface NominatimReverseResult {
+  display_name: string;
+  address: {
+    road?: string;
+    suburb?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+}
+
+// Update the interface to include address
 interface MapSelectionProps {
-  onLocationSelect: (coordinates: Coordinates & { name?: string }) => void;
+  onLocationSelect: (
+    coordinates: Coordinates & { name?: string; address?: string },
+  ) => void;
   onClose: () => void;
   initialLocation?: { coordinates: Coordinates; name?: string };
 }
@@ -138,22 +152,38 @@ const MapSelection: React.FC<MapSelectionProps> = ({
 
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-  const handleMapClick = (coords: Coordinates) => {
+  const handleMapClick = async (coords: Coordinates) => {
     setPosition(coords);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}`,
+      );
+      if (!response.ok) throw new Error("Failed to fetch address");
+      const data = (await response.json()) as NominatimReverseResult;
+      setAddress(data.display_name || "");
+      if (!locationName) {
+        setLocationName(data.display_name?.split(",")[0] ?? "Unknown Location");
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+    }
   };
 
+  // Update handleSave to include both name and address
   const handleSave = () => {
     if (position) {
       const locationToSave = {
         coordinates: position,
-        name: locationName || "",
+        name: locationName,
+        address: address,
       };
 
       localStorage.setItem("savedLocation", JSON.stringify(locationToSave));
 
       onLocationSelect({
         ...position,
-        name: locationName || "",
+        name: locationName,
+        address: address,
       });
     }
   };
@@ -178,14 +208,20 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
   };
 
+  // Update handleSelectAddress to keep both values
   const handleSelectAddress = (suggestion: NominatimSearchResult) => {
     const newPosition = {
       lat: parseFloat(suggestion.lat),
       lng: parseFloat(suggestion.lon),
     };
     setPosition(newPosition);
-    setLocationName(suggestion.display_name);
-    setAddress(suggestion.display_name);
+    // Fix the TypeScript error by ensuring we always pass a string
+    setAddress(suggestion.display_name || "");
+    if (!locationName) {
+      setLocationName(
+        suggestion.display_name.split(",")[0] ?? "Unknown Location",
+      );
+    }
     setAddressSuggestions([]);
 
     if (mapRef.current) {
