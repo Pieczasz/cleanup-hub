@@ -47,22 +47,11 @@ import { useRouter } from "next/navigation";
 import { Loader2, Check } from "lucide-react";
 
 // Type definitions for Nominatim API responses
-interface NominatimAddress {
-  road?: string;
-  suburb?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-}
 
 interface NominatimSearchResult {
   lat: string;
   lon: string;
   display_name: string;
-}
-
-interface NominatimReverseResult {
-  address: NominatimAddress;
 }
 
 interface Coordinates {
@@ -134,37 +123,6 @@ async function fetchCoordinatesFromAddress(address: string): Promise<{
   } else {
     throw new Error("Address not found");
   }
-}
-
-async function fetchAddressFromCoordinates(
-  lat: number,
-  lng: number,
-): Promise<string> {
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch address from Nominatim API");
-  }
-
-  const data = (await response.json()) as NominatimReverseResult;
-
-  if (data?.address) {
-    const address = data.address;
-    const readableAddress = [
-      address.road,
-      address.suburb,
-      address.city,
-      address.state,
-      address.country,
-    ]
-      .filter((part): part is string => Boolean(part))
-      .join(", ");
-    return readableAddress;
-  }
-
-  throw new Error("Address not found");
 }
 
 interface CreateEventFormProps {
