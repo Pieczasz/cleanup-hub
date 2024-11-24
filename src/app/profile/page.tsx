@@ -13,8 +13,8 @@ export default function Account() {
   if (status === "loading") {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-          <div className="animate-pulse text-gray-400">Loading profile...</div>
+        <div className="flex justify-center py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
         </div>
       </div>
     );

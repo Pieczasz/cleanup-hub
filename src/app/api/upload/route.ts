@@ -18,6 +18,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    // Check file size (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      return NextResponse.json(
+        { error: "File size must be less than 1MB" },
+        { status: 400 }
+      );
+    }
+
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = new Uint8Array(arrayBuffer);

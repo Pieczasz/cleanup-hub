@@ -5,6 +5,9 @@ import type { Session } from "next-auth";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 interface EditProfileFormProps {
   session: Session | null;
@@ -84,13 +87,14 @@ export default function EditProfileForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-6">
-        <div className="relative h-24 w-24 overflow-hidden rounded-full">
+        <div className="relative h-24 w-24 rounded-full">
           {user?.image ? (
             <Image
               src={user.image}
               alt="Profile Image"
-              fill
-              className="object-cover"
+              className="rounded-full object-cover"
+              width={96}
+              height={96}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400">
@@ -98,43 +102,40 @@ export default function EditProfileForm({
             </div>
           )}
         </div>
-        <input
+        <Input
           type="file"
           onChange={uploadFile}
           accept="image/*"
           disabled={isUploading}
-          className="block w-full cursor-pointer rounded-lg border border-gray-200 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="name" className="text-sm font-medium text-gray-700">
+        <Label htmlFor="name" className="text-sm font-medium">
           Name
-        </label>
-        <input
+        </Label>
+        <Input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white p-2 text-gray-900"
+          className="w-full rounded-lg"
           placeholder="Enter your name"
         />
       </div>
 
       <div className="flex gap-4">
-        <button
-          type="submit"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
+        <Button type="submit" className="rounded-lg px-4 py-2">
           Save Changes
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant={`outline`}
           onClick={onCancel}
-          className="rounded-lg border border-gray-200 px-4 py-2 hover:bg-gray-50"
+          className="rounded-lg px-4 py-2"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

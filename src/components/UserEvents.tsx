@@ -15,7 +15,11 @@ export function UserEvents({ userId }: UserEventsProps) {
   );
 
   if (isLoading) {
-    return <div className="animate-pulse">Loading events...</div>;
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (!events?.length) {
