@@ -1,8 +1,13 @@
 "use client";
-import { api } from "@/trpc/react";
+// Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
+
+// Icons
+import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
+
+// Functions
+import { api } from "@/trpc/react";
 
 interface UserEventsProps {
   userId?: string;

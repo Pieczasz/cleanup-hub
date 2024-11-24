@@ -1,13 +1,19 @@
 "use client";
-import { useState } from "react";
+
+// Components
 import Image from "next/image";
-import type { Session } from "next-auth";
-import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+
+// Functions
+import { useState } from "react";
+import type { Session } from "next-auth";
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
+
+// Hooks
+import { useToast } from "@/hooks/use-toast";
 
 interface EditProfileFormProps {
   session: Session | null;

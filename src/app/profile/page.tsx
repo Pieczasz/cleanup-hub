@@ -1,11 +1,14 @@
 "use client";
+
+// Components
 import AccountForm from "@/components/AccountForm";
-import { useSession } from "next-auth/react";
-import { api } from "@/trpc/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserEvents } from "@/components/UserEvents";
 import PageLayout from "@/components/PageLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+
+// Functions
+import { useSession } from "next-auth/react";
 
 export default function Account() {
   const { data: session, status } = useSession();

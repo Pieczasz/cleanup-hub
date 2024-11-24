@@ -1,3 +1,4 @@
+import { create } from "domain";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -8,6 +9,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -26,10 +28,12 @@ export const users = createTable("user", {
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  attendedEvents: many(eventAttendance),
 }));
 
 export const accounts = createTable(
@@ -130,12 +134,50 @@ export const events = createTable(
   }),
 );
 
-export const eventsRelations = relations(events, ({ one }) => ({
+export const eventsRelations = relations(events, ({ one, many }) => ({
   creator: one(users, {
     fields: [events.creatorId],
     references: [users.id],
   }),
+  attendance: many(eventAttendance),
 }));
+
+export const eventAttendance = createTable(
+  "event_attendance",
+  {
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+    eventId: varchar("event_id", { length: 255 })
+      .notNull()
+      .references(() => events.id),
+    attended: boolean("attended").notNull(),
+    rating: integer("rating").notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+  },
+  (attendance) => ({
+    userIdIdx: index("attendance_user_id_idx").on(attendance.userId),
+    eventIdIdx: index("attendance_event_id_idx").on(attendance.eventId),
+    pk: primaryKey({ columns: [attendance.userId, attendance.eventId] }), // Use compound key as the only primary key
+  }),
+);
+
+export const eventAttendanceRelations = relations(
+  eventAttendance,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [eventAttendance.userId],
+      references: [users.id],
+    }),
+    event: one(events, {
+      fields: [eventAttendance.eventId],
+      references: [events.id],
+    }),
+  }),
+);
 
 export type DBEvent = typeof events.$inferSelect;
 
@@ -158,4 +200,16 @@ export type Event = {
   participantsCount: number;
   participantIds: string[];
   distance?: number;
+  attendance?: {
+    attended: boolean;
+    rating: number;
+  }[];
+};
+
+export type UserEventHistory = {
+  id: string;
+  eventName: string;
+  date: string;
+  attended: boolean;
+  rating: number;
 };

@@ -14,10 +14,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AttendanceDialog } from "@/components/AttendanceDialog";
 
 // Functions
 import { useEffect, useState } from "react";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 
@@ -40,12 +41,20 @@ const EventPage = ({ params }: PostPageProps) => {
   const [isSlugResolved, setIsSlugResolved] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
+  const [isEventOngoing, setIsEventOngoing] = useState(false);
 
+  const router = useRouter();
   // Unwrap the params Promise and set the slug. This is because getting slug directly without promise will not work in future versions of Next.js
   useEffect(() => {
     params
       .then((resolvedParams) => {
-        setSlug(resolvedParams.slug?.join(""));
+        if (Array.isArray(resolvedParams.slug)) {
+          const eventId = resolvedParams.slug.join("/");
+          setSlug(eventId);
+        } else {
+          setSlug(resolvedParams.slug);
+        }
         setIsSlugResolved(true); // Mark slug as resolved
       })
       .catch((error) => {
@@ -67,6 +76,26 @@ const EventPage = ({ params }: PostPageProps) => {
   const { data: creator } = api.post.getUserById.useQuery(
     { id: event?.creatorId ?? "" },
     { enabled: !!event?.creatorId },
+  );
+
+  // Add this query to get participant details
+  const { data: participants } = api.post.getEventParticipants.useQuery(
+    { eventId: event?.id ?? "" },
+    {
+      enabled: !!event?.id,
+      select: (
+        data: {
+          id: string;
+          name: string | null | undefined;
+          image: string | null | undefined;
+        }[],
+      ) =>
+        data.map((participant) => ({
+          id: participant.id,
+          name: participant.name ?? null,
+          image: participant.image ?? null,
+        })),
+    },
   );
 
   const utils = api.useContext();
@@ -122,6 +151,39 @@ const EventPage = ({ params }: PostPageProps) => {
     },
   });
 
+  const { mutate: submitAttendance } = api.post.submitAttendance.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Attendance submitted successfully",
+      });
+      setShowAttendanceDialog(false);
+      // Invalidate queries to refresh data
+      void utils.post.getEventById.invalidate({ id: event?.id ?? "" });
+      void utils.post.getUserEventHistory.invalidate();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const [isSubmittingAttendance, setIsSubmittingAttendance] = useState(false);
+
+  const handleAttendanceSubmit = (
+    attendance: { userId: string; attended: boolean; rating: number }[],
+  ) => {
+    if (!event) return;
+    setIsSubmittingAttendance(true);
+    submitAttendance({
+      eventId: event.id,
+      attendance,
+    });
+  };
+
   const isParticipant = event?.participantIds.includes(session?.user.id ?? "");
 
   // Redirect to 404 if no event is found and not loading
@@ -139,7 +201,7 @@ const EventPage = ({ params }: PostPageProps) => {
       const diff = eventDate.getTime() - now.getTime();
 
       if (diff <= 0) {
-        setTimeLeft("Event has ended");
+        setTimeLeft("Event is ongoing");
         clearInterval(timer);
         return;
       }
@@ -151,6 +213,23 @@ const EventPage = ({ params }: PostPageProps) => {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       setTimeLeft(`${days}d ${hours}h ${minutes}m`);
     }, 1000);
+
+    return () => clearInterval(timer);
+  }, [event?.date]);
+
+  // Add this effect to check if event is ongoing for 10+ minutes
+  useEffect(() => {
+    if (!event?.date) return;
+
+    const checkEventStatus = () => {
+      const eventDate = new Date(event.date);
+      const now = new Date();
+      const diffInMinutes = (now.getTime() - eventDate.getTime()) / (1000 * 60);
+      setIsEventOngoing(diffInMinutes >= 10);
+    };
+
+    const timer = setInterval(checkEventStatus, 60000); // Check every minute
+    checkEventStatus(); // Initial check
 
     return () => clearInterval(timer);
   }, [event?.date]);
@@ -183,6 +262,9 @@ const EventPage = ({ params }: PostPageProps) => {
       joinEvent({ eventId: event!.id });
     }
   };
+
+  const showFinishButton =
+    isEventOngoing && event?.creatorId === session?.user.id;
 
   return (
     <PageLayout>
@@ -235,9 +317,25 @@ const EventPage = ({ params }: PostPageProps) => {
                           width={40}
                           height={40}
                           alt="Creator Avatar"
-                          className="rounded-full"
+                          className="rounded-full hover:cursor-pointer"
+                          onClick={() => {
+                            if (session?.user.id === creator?.id) {
+                              router.push("/profile");
+                            } else {
+                              router.push(`/profile/${creator?.id}`);
+                            }
+                          }}
                         />
-                        <span className="text-lg font-medium">
+                        <span
+                          className="text-lg font-medium hover:cursor-pointer"
+                          onClick={() => {
+                            if (session?.user.id === creator?.id) {
+                              router.push("/profile");
+                            } else {
+                              router.push(`/profile/${creator?.id}`);
+                            }
+                          }}
+                        >
                           Hosted by {creator?.name ?? "Unknown"}
                         </span>
                       </div>
@@ -349,6 +447,21 @@ const EventPage = ({ params }: PostPageProps) => {
                           : "Join Event"}
                     </Button>
                   </div>
+                  {showFinishButton && (
+                    <Button
+                      onClick={() => setShowAttendanceDialog(true)}
+                      className="mt-4 bg-green-600 hover:bg-green-700"
+                    >
+                      Finish Event
+                    </Button>
+                  )}
+                  <AttendanceDialog
+                    isOpen={showAttendanceDialog}
+                    onClose={() => setShowAttendanceDialog(false)}
+                    participants={participants ?? []}
+                    onSubmit={handleAttendanceSubmit}
+                    isSubmitting={isSubmittingAttendance}
+                  />
                 </div>
               </div>
             </>

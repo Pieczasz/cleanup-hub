@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+
+// Components
 import Image from "next/image";
-import type { Session } from "next-auth";
-import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
-import EditProfileForm from "./EditProfileForm";
 import { Button } from "./ui/button";
+import EditProfileForm from "./EditProfileForm";
+
+// Functions
+import { useState } from "react";
+import type { Session } from "next-auth";
 
 interface ProfileProps {
   session: Session | null;
@@ -13,14 +15,7 @@ interface ProfileProps {
 
 export default function Profile({ session }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const router = useRouter();
   const user = session?.user;
-
-  const updateUser = api.post.updateUser.useMutation({
-    onSuccess: () => {
-      router.refresh();
-    },
-  });
 
   if (!user) {
     return (

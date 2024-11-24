@@ -8,12 +8,6 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: [
-    "user",
-    "account",
-    "session",
-    "verificationToken",
-    "event",
-    "*",
-  ],
+  schemaFilter: ["public"],
+  tablesFilter: ["*"],
 } satisfies Config;

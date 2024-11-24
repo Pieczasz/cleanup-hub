@@ -1,11 +1,18 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { events, type DBEvent, type Event, users } from "@/server/db/schema";
-import { sql } from "drizzle-orm";
+import {
+  events,
+  type DBEvent,
+  type Event,
+  users,
+  eventAttendance,
+} from "@/server/db/schema";
+import { sql, eq, desc } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   getUserByEmail: publicProcedure
@@ -556,5 +563,106 @@ export const postRouter = createTRPCRouter({
           participantIds: dbEvent.participantIds as string[],
         }),
       );
+    }),
+
+  getUserEventHistory: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userHistory = await ctx.db
+        .select({
+          id: events.id,
+          eventName: events.title,
+          date: events.date,
+          attended: eventAttendance.attended,
+          rating: eventAttendance.rating,
+        })
+        .from(eventAttendance)
+        .innerJoin(events, eq(eventAttendance.eventId, events.id))
+        .where(eq(eventAttendance.userId, input.userId))
+        .orderBy(desc(events.date));
+
+      return userHistory;
+    }),
+
+  getEventParticipants: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.eventId),
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      const participantIds = event.participantIds as string[];
+
+      const participants = await Promise.all(
+        participantIds.map(async (id) => {
+          const user = await ctx.db.query.users.findFirst({
+            where: eq(users.id, id),
+          });
+          return {
+            id: user?.id ?? id,
+            name: user?.name,
+            image: user?.image,
+          };
+        }),
+      );
+
+      return participants;
+    }),
+
+  submitAttendance: protectedProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+        attendance: z.array(
+          z.object({
+            userId: z.string(),
+            attended: z.boolean(),
+            rating: z.number().min(0).max(5),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.eventId),
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      if (event.creatorId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event creator can submit attendance",
+        });
+      }
+
+      // Delete any existing attendance records for this event
+      await ctx.db
+        .delete(eventAttendance)
+        .where(eq(eventAttendance.eventId, input.eventId));
+
+      // Insert new attendance records
+      await ctx.db.insert(eventAttendance).values(
+        input.attendance.map((record) => ({
+          userId: record.userId,
+          eventId: input.eventId,
+          attended: record.attended,
+          rating: record.rating,
+        })),
+      );
+
+      return { success: true };
     }),
 });

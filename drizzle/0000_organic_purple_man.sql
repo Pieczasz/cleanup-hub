@@ -13,16 +13,25 @@ CREATE TABLE IF NOT EXISTS "account" (
 	CONSTRAINT "account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "event_attendance" (
+	"user_id" varchar(255) NOT NULL,
+	"event_id" varchar(255) NOT NULL,
+	"attended" boolean NOT NULL,
+	"rating" integer NOT NULL,
+	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT "event_attendance_user_id_event_id_pk" PRIMARY KEY("user_id","event_id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "event" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" varchar(255) NOT NULL,
-	"location" varchar(255) NOT NULL,
+	"location" jsonb NOT NULL,
 	"date" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 	"type" varchar(255) NOT NULL,
 	"max_participants" integer,
-	"participants" json DEFAULT '[]'::json,
-	"userId" varchar(255) NOT NULL
+	"participant_ids" jsonb DEFAULT '[]'::jsonb,
+	"creator_id" varchar(255) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "session" (
@@ -47,11 +56,6 @@ CREATE TABLE IF NOT EXISTS "verificationToken" (
 	CONSTRAINT "verificationToken_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
-DROP TABLE "cleanup_hub_account";--> statement-breakpoint
-DROP TABLE "cleanup_hub_event";--> statement-breakpoint
-DROP TABLE "cleanup_hub_session";--> statement-breakpoint
-DROP TABLE "cleanup_hub_user";--> statement-breakpoint
-DROP TABLE "cleanup_hub_verificationToken";--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "account" ADD CONSTRAINT "account_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -59,7 +63,19 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "event" ADD CONSTRAINT "event_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "event_attendance" ADD CONSTRAINT "event_attendance_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "event_attendance" ADD CONSTRAINT "event_attendance_event_id_event_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."event"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "event" ADD CONSTRAINT "event_creator_id_user_id_fk" FOREIGN KEY ("creator_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -71,6 +87,8 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "account_user_id_idx" ON "account" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "event_user_id_idx" ON "event" USING btree ("userId");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "attendance_user_id_idx" ON "event_attendance" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "attendance_event_id_idx" ON "event_attendance" USING btree ("event_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "event_creator_id_idx" ON "event" USING btree ("creator_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "event_date_idx" ON "event" USING btree ("date");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sessionUserIdIdx" ON "session" USING btree ("user_id");
