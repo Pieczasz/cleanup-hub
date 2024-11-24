@@ -105,7 +105,7 @@ export const postRouter = createTRPCRouter({
           participantIds: dbEvent.participantIds as string[],
         };
       })
-      .sort((a, b) => b.participantsCount - a.participantsCount);
+      .sort((a, b) => a.participantsCount - b.participantsCount);
   }),
 
   getEventById: publicProcedure

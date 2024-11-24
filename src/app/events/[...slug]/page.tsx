@@ -223,13 +223,13 @@ const EventPage = ({ params }: PostPageProps) => {
               </AlertDialog>
 
               <div className="w-full py-12">
-                <div className="rounded-lg bg-white">
+                <div className="rounded-lg bg-white px-4 sm:px-6 lg:px-8">
                   <div className="mb-8 border-b pb-6">
-                    <div className="flex flex-row items-center justify-between">
-                      <h2 className="text-5xl font-bold text-gray-800">
+                    <div className="flex flex-col items-start justify-between lg:flex-row lg:items-center">
+                      <h2 className="text-3xl font-bold text-gray-800 sm:text-5xl">
                         {event.name}
                       </h2>
-                      <div className="mt-4 flex items-center gap-2">
+                      <div className="mt-4 flex items-center gap-2 sm:mt-0">
                         <Image
                           src={creator?.image ?? "/defaultAvatar.jpg"}
                           width={40}
@@ -278,7 +278,7 @@ const EventPage = ({ params }: PostPageProps) => {
 
                       <Button
                         onClick={handleEventParticipation}
-                        className={`max-w-[10rem] rounded-3xl py-5 text-lg ${
+                        className={`hidden max-w-full rounded-3xl py-5 text-lg md:max-w-[10rem] lg:flex ${
                           event.creatorId === session?.user.id
                             ? "bg-red-600 hover:bg-red-600/90"
                             : isParticipant
@@ -323,12 +323,31 @@ const EventPage = ({ params }: PostPageProps) => {
                               event.location.coordinates.lng,
                             )
                           }
-                          className="mt-3 max-w-[16rem] rounded-3xl bg-blue-600 py-5 text-lg text-white hover:bg-blue-600/90"
+                          className="mt-3 max-w-full rounded-3xl bg-blue-600 py-5 text-lg text-white hover:bg-blue-600/90"
                         >
                           Open in Google Maps
                         </Button>
                       </div>
                     </div>
+                  </div>
+                  <div className="mt-4 flex w-full items-center justify-center lg:hidden">
+                    <Button
+                      onClick={handleEventParticipation}
+                      className={`max-w-full rounded-3xl py-5 text-lg ${
+                        event.creatorId === session?.user.id
+                          ? "bg-red-600 hover:bg-red-600/90"
+                          : isParticipant
+                            ? "bg-red-600 hover:bg-red-600/90"
+                            : "bg-blue-600 hover:bg-blue-600/90"
+                      }`}
+                      disabled={!session}
+                    >
+                      {event.creatorId === session?.user.id
+                        ? "Delete Event"
+                        : isParticipant
+                          ? "Leave Event"
+                          : "Join Event"}
+                    </Button>
                   </div>
                 </div>
               </div>
