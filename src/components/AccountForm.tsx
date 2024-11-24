@@ -4,12 +4,14 @@ import Image from "next/image";
 import type { Session } from "next-auth";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import EditProfileForm from "./EditProfileForm";
 
 interface ProfileProps {
   session: Session | null;
 }
 
 export default function Profile({ session }: ProfileProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
   const user = session?.user;
@@ -60,6 +62,10 @@ export default function Profile({ session }: ProfileProps) {
     );
   }
 
+  if (isEditing) {
+    return <EditProfileForm session={session} onCancel={() => setIsEditing(false)} />;
+  }
+
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center gap-6">
@@ -78,23 +84,14 @@ export default function Profile({ session }: ProfileProps) {
           )}
         </div>
         <div className="flex-1">
-          <h2 className="mb-2 text-xl font-semibold">
-            {user.name ?? user.email}
-          </h2>
-          <div className="relative">
-            <input
-              type="file"
-              onChange={uploadFile}
-              accept="image/*"
-              disabled={isUploading}
-              className="block w-full cursor-pointer rounded-lg border border-gray-200 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            {isUploading && (
-              <div className="mt-2 text-sm text-gray-500">
-                Uploading image...
-              </div>
-            )}
-          </div>
+          <h2 className="mb-2 text-xl font-semibold">{user.name ?? user.email}</h2>
+          <p className="text-gray-600">{user.email}</p>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Edit Profile
+          </button>
         </div>
       </div>
     </div>

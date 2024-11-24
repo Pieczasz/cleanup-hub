@@ -56,15 +56,19 @@ export const postRouter = createTRPCRouter({
     }),
 
   updateUser: protectedProcedure
-    .input(z.object({
-      image: z.string(),
-    }))
+    .input(
+      z.object({
+        name: z.string().optional(),
+        image: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const [updatedUser] = await ctx.db
         .update(users)
         .set({
+          name: input.name,
           image: input.image,
         })
         .where(sql`id = ${userId}`)
@@ -216,7 +220,7 @@ export const postRouter = createTRPCRouter({
         const toRad = (value: number) => (value * Math.PI) / 180;
         const R = 6371; // Radius of the Earth in km
         const dLat = toRad(lat2 - lat1);
-        const dLng = toRad(lng2 - lng1);
+        const dLng = toRad(lat2 - lng1);
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos(toRad(lat1)) *
@@ -525,25 +529,32 @@ export const postRouter = createTRPCRouter({
         .from(events)
         .where(sql`${events.creatorId} = ${input.userId}`);
 
-      return eventsData.map((dbEvent: DBEvent): Event => ({
-        id: dbEvent.id,
-        name: dbEvent.title,
-        creatorId: dbEvent.creatorId,
-        type: dbEvent.type,
-        description: dbEvent.description,
-        date: dbEvent.date
-          ? dbEvent.date.toISOString().split("T")[0] +
-            " " +
-            dbEvent.date.toISOString().split("T")[1]?.split(":").slice(0, 2).join(":")
-          : "",
-        location: dbEvent.location as {
-          name: string;
-          address: string;
-          coordinates: { lat: number; lng: number };
-        },
-        maxParticipants: dbEvent.maxParticipants ?? 10,
-        participantsCount: (dbEvent.participantIds as string[]).length,
-        participantIds: dbEvent.participantIds as string[],
-      }));
+      return eventsData.map(
+        (dbEvent: DBEvent): Event => ({
+          id: dbEvent.id,
+          name: dbEvent.title,
+          creatorId: dbEvent.creatorId,
+          type: dbEvent.type,
+          description: dbEvent.description,
+          date: dbEvent.date
+            ? dbEvent.date.toISOString().split("T")[0] +
+              " " +
+              dbEvent.date
+                .toISOString()
+                .split("T")[1]
+                ?.split(":")
+                .slice(0, 2)
+                .join(":")
+            : "",
+          location: dbEvent.location as {
+            name: string;
+            address: string;
+            coordinates: { lat: number; lng: number };
+          },
+          maxParticipants: dbEvent.maxParticipants ?? 10,
+          participantsCount: (dbEvent.participantIds as string[]).length,
+          participantIds: dbEvent.participantIds as string[],
+        }),
+      );
     }),
 });
