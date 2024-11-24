@@ -4,7 +4,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { events, type DBEvent, type Event } from "@/server/db/schema";
+import { events, type DBEvent, type Event, users } from "@/server/db/schema";
 import { sql } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
@@ -27,6 +27,54 @@ export const postRouter = createTRPCRouter({
         where: (users, { eq }) => eq(users.id, input.id),
       });
       return user;
+    }),
+
+  updateUserProfile: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().nullable(),
+        image: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, name, image } = input;
+      const [updatedUser] = await ctx.db
+        .update(users)
+        .set({
+          name,
+          image,
+        })
+        .where(sql`id = ${id}`)
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error("Failed to update the user profile");
+      }
+
+      return updatedUser;
+    }),
+
+  updateUser: protectedProcedure
+    .input(z.object({
+      image: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      
+      const [updatedUser] = await ctx.db
+        .update(users)
+        .set({
+          image: input.image,
+        })
+        .where(sql`id = ${userId}`)
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error("Failed to update user");
+      }
+
+      return updatedUser;
     }),
 
   createEvent: protectedProcedure
