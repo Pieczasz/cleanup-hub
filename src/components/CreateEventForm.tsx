@@ -43,7 +43,7 @@ const MapWithNoSSR = dynamic(() => import("./MapSelection"), {
 
 // Icons
 import { FaLocationDot } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { Loader2, Check } from "lucide-react";
 
 // Type definitions for Nominatim API responses
@@ -173,11 +173,18 @@ export function CreateEventForm({
           description:
             "Event created successfully. You've been added as a participant.",
         });
-        // Close the dialog first
-        onClose();
-        // Wait 1 second before redirecting
+        
+        // Close dialog and cleanup map
+        setShowMap(false); // Ensure map is hidden
+        onClose(); // Close the dialog
+
+        // Use router.push with { shallow: true } to prevent full page reload
         setTimeout(() => {
-          router.push(`/events/${data.id}`);
+          router.push(`/events/${data.id}`).catch((error) => {
+            console.error('Navigation failed:', error);
+            // Fallback to window.location if router.push fails
+            window.location.href = `/events/${data.id}`;
+          });
         }, 1000);
       } else {
         console.error("Unexpected data shape or missing event ID:", data);
@@ -205,7 +212,7 @@ export function CreateEventForm({
           description:
             "Event updated successfully. Your changes has been saved. If you don't see the changes, please refresh the page.",
         });
-        router.refresh();
+        router.reload();
         onClose(); // Close the form after successful update
       } else {
         console.error("Unexpected data shape or missing event ID:", data);
