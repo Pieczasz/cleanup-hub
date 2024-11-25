@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserEvents } from "@/components/UserEvents";
 import PageLayout from "@/components/PageLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import { UserParticipatedEvents } from "@/components/UserParticipatedEvents";
 
 // Functions
 import { useSession } from "next-auth/react";
@@ -28,17 +29,27 @@ export default function Account() {
       <MaxWidthWrapper>
         <div className="w-full">
           <div>
-            <h1 className="mb-6 text-3xl font-bold">My Profile</h1>
+            <h1 className="mb-12 text-3xl font-bold sm:mb-6">My Profile</h1>
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="profile">Profile Settings</TabsTrigger>
-                <TabsTrigger value="events">My Events</TabsTrigger>
+              <TabsList className="mb-4 flex w-full flex-col gap-2 sm:flex-row">
+                <TabsTrigger value="profile" className="w-full">
+                  Profile Settings
+                </TabsTrigger>
+                <TabsTrigger value="events" className="w-full">
+                  My Events
+                </TabsTrigger>
+                <TabsTrigger value="participated" className="w-full">
+                  Participated Events
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="profile">
                 <AccountForm session={session} />
               </TabsContent>
               <TabsContent value="events">
                 <UserEvents userId={session?.user.id} />
+              </TabsContent>
+              <TabsContent value="participated">
+                <UserParticipatedEvents userId={session?.user.id} />
               </TabsContent>
             </Tabs>
           </div>

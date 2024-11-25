@@ -1,12 +1,6 @@
 "use client";
-// Components
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EventCard } from "./EventCard";
 import Link from "next/link";
-
-// Icons
-import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
-
-// Functions
 import { api } from "@/trpc/react";
 
 interface UserEventsProps {
@@ -29,7 +23,7 @@ export function UserEvents({ userId }: UserEventsProps) {
 
   if (!events?.length) {
     return (
-      <div className="py-8 text-center">
+      <div className="mt-12 py-8 text-center sm:mt-0">
         <p className="mb-4 text-gray-500">
           You haven&apos;t created any events yet.
         </p>
@@ -41,35 +35,9 @@ export function UserEvents({ userId }: UserEventsProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="mt-12 grid grid-cols-1 gap-4 sm:mt-0 sm:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => (
-        <Card
-          key={event.id}
-          className="overflow-hidden transition-shadow hover:shadow-md"
-        >
-          <Link href={`/events/${event.id}`}>
-            <CardHeader className="bg-primary/5">
-              <CardTitle className="text-xl">{event.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="space-y-2">
-                <div className="flex items-center text-gray-600">
-                  <CalendarDaysIcon className="mr-2 h-4 w-4" />
-                  {event.date}
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <MapPinIcon className="mr-2 h-4 w-4" />
-                  {event.location.name || event.location.address}
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <UsersIcon className="mr-2 h-4 w-4" />
-                  {event.participantsCount} / {event.maxParticipants}{" "}
-                  participants
-                </div>
-              </div>
-            </CardContent>
-          </Link>
-        </Card>
+        <EventCard key={event.id} event={event} />
       ))}
     </div>
   );

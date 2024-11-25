@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 // Types
 import type { Event } from "@/server/db/schema";
 import { Button } from "@/components/ui/button";
+import { eventTypeColors, type EventType } from "@/lib/constants";
 
 interface PostPageProps {
   params: Promise<{
@@ -348,7 +349,9 @@ const EventPage = ({ params }: PostPageProps) => {
                         </span>
                       </div>
                     </div>
-                    <span className="mt-3 inline-block rounded-full bg-blue-100 px-4 py-2 text-base text-blue-800">
+                    <span
+                      className={`mt-3 inline-block rounded-full px-4 py-2 text-base ${eventTypeColors[event.type as EventType]}`}
+                    >
                       {event.type === "treePlanting"
                         ? "Tree Planting"
                         : event.type[0]?.toLocaleUpperCase() +
@@ -374,7 +377,7 @@ const EventPage = ({ params }: PostPageProps) => {
                         </p>
                         <div className="mt-3 h-3 w-full rounded-full bg-gray-200">
                           <div
-                            className="h-3 rounded-full bg-blue-500"
+                            className="h-3 rounded-full bg-[#6AA553]"
                             style={{
                               width: `${(event.participantsCount / event.maxParticipants) * 100}%`,
                             }}
@@ -404,7 +407,7 @@ const EventPage = ({ params }: PostPageProps) => {
                             className={`max-w-full rounded-3xl py-5 text-lg ${
                               isParticipant
                                 ? "bg-red-600 hover:bg-red-600/90"
-                                : "bg-blue-600 hover:bg-blue-600/90"
+                                : "bg-[#6AA553] hover:bg-[#6AA553]"
                             }`}
                             disabled={!session}
                           >
@@ -420,7 +423,7 @@ const EventPage = ({ params }: PostPageProps) => {
                         <p className="text-lg text-gray-600">
                           {new Date(event.date).toLocaleString()}
                         </p>
-                        <p className="mt-2 text-base font-medium text-blue-600">
+                        <p className="mt-2 text-base font-medium text-green-800">
                           Time until event: {timeLeft}
                         </p>
                       </div>
@@ -439,7 +442,7 @@ const EventPage = ({ params }: PostPageProps) => {
                           onClick={() =>
                             openInGoogleMaps(event.location.coordinates)
                           }
-                          className="mt-3 max-w-full rounded-3xl bg-blue-600 py-5 text-lg text-white hover:bg-blue-600/90"
+                          className="mt-3 max-w-full rounded-3xl py-5 text-lg"
                         >
                           Open in Google Maps
                         </Button>
@@ -454,7 +457,7 @@ const EventPage = ({ params }: PostPageProps) => {
                           ? "bg-red-600 hover:bg-red-600/90"
                           : isParticipant
                             ? "bg-red-600 hover:bg-red-600/90"
-                            : "bg-blue-600 hover:bg-blue-600/90"
+                            : "bg-[#6AA553] hover:bg-[#6AA553]/90"
                       }`}
                       disabled={!session}
                     >

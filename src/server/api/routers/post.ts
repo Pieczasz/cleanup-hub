@@ -718,4 +718,46 @@ export const postRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  getUserParticipatedEvents: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const currentDate = new Date().toISOString();
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(
+          sql`${events.date}::text > ${currentDate} AND ${
+            events.participantIds
+          } @> ${JSON.stringify([input.userId])}::jsonb`,
+        );
+
+      return eventsData.map(
+        (dbEvent: DBEvent): Event => ({
+          id: dbEvent.id,
+          name: dbEvent.title,
+          creatorId: dbEvent.creatorId,
+          type: dbEvent.type,
+          description: dbEvent.description,
+          date: dbEvent.date
+            ? dbEvent.date.toISOString().split("T")[0] +
+              " " +
+              dbEvent.date
+                .toISOString()
+                .split("T")[1]
+                ?.split(":")
+                .slice(0, 2)
+                .join(":")
+            : "",
+          location: dbEvent.location as {
+            name: string;
+            address: string;
+            coordinates: { lat: number; lng: number };
+          },
+          maxParticipants: dbEvent.maxParticipants ?? 10,
+          participantsCount: (dbEvent.participantIds as string[]).length,
+          participantIds: dbEvent.participantIds as string[],
+        }),
+      );
+    }),
 });
