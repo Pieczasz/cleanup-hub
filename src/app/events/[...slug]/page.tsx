@@ -234,9 +234,11 @@ const EventPage = ({ params }: PostPageProps) => {
     return () => clearInterval(timer);
   }, [event?.date]);
 
-  const openInGoogleMaps = (lat: number, lng: number) => {
+  const openInGoogleMaps = (address: string) => {
     window.open(
-      `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        address,
+      )}`,
       "_blank",
     );
   };
@@ -416,10 +418,7 @@ const EventPage = ({ params }: PostPageProps) => {
                         )}
                         <Button
                           onClick={() =>
-                            openInGoogleMaps(
-                              event.location.coordinates.lat,
-                              event.location.coordinates.lng,
-                            )
+                            openInGoogleMaps(event.location.address)
                           }
                           className="mt-3 max-w-full rounded-3xl bg-blue-600 py-5 text-lg text-white hover:bg-blue-600/90"
                         >

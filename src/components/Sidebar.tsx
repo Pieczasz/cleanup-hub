@@ -4,6 +4,7 @@
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Image from "next/image"; // Add this import
 
 // Framer motion
 import { motion } from "framer-motion";
@@ -95,6 +96,20 @@ const Sidebar: React.FC<SidebarProps> = ({
             {link.name}
           </Link>
         ))}
+        {isClient && session ? (
+          <Link href="/profile" className="flex items-center gap-x-2" onClick={onLinkClick}>
+            <div className="h-8 w-8 overflow-hidden rounded-full">
+              <Image
+                src={session.user.image ?? "/default-avatar.png"}
+                alt="Profile"
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <span className="capitalize">Profile</span>
+          </Link>
+        ) : null}
       </nav>
       <Socials containerStyles="flex flex-row justify-center items-center gap-x-4 p-4" />
     </motion.div>

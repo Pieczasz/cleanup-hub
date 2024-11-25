@@ -2,6 +2,8 @@
 
 // Functions
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react"; // Add this import
+import Image from "next/image"; // Add this import
 
 // Components
 import Nav from "@/components/Nav";
@@ -15,6 +17,7 @@ import MaxWidthWrapper from "./MaxWidthWrapper";
 
 const Header: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const { data: session } = useSession(); // Add this line
 
   const handleSidebarClose = () => {
     setShowSidebar(false);
@@ -44,7 +47,7 @@ const Header: React.FC = () => {
               </h4>
               <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-[#6DAA53] bg-primary transition-all duration-500 group-hover:scale-x-100" />
             </Link>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-4">
               <Nav
                 containerStyles="hidden lg:flex gap-x-8 items-center"
                 linkStyles="relative hover:text-primary transition-all"
@@ -53,6 +56,19 @@ const Header: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-x-6 lg:hidden">
+              {session && (
+                <Link href="/profile">
+                  <div className="h-8 w-8 overflow-hidden rounded-full">
+                    <Image
+                      src={session.user.image ?? "/default-avatar.png"}
+                      alt="Profile"
+                      width={32}
+                      height={32}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </Link>
+              )}
               <div className="flex gap-x-2">
                 {!showSidebar && (
                   <Menu

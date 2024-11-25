@@ -4,6 +4,7 @@
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Image from "next/image"; // Add this import
 
 // Framer motion
 import { motion } from "framer-motion";
@@ -45,20 +46,11 @@ const Nav: React.FC<NavProps> = ({
     }
   }, [session, isClient]);
 
-  // Don't render the "Sign In" link if user is authenticated
+  // Modified links array - removes the sign in option
   const links: NavLink[] = [
     { path: "/events", name: "events" },
     { path: "/about", name: "about" },
     { path: "/contact", name: "contact" },
-    ...(isClient && !session
-      ? [
-          {
-            path: "/signIn",
-            name: "sign in",
-            additionalStyles: "text-[#6FC03B]",
-          },
-        ]
-      : []),
   ];
 
   // Render nothing until client-side hydration and session loading are complete
@@ -84,6 +76,26 @@ const Nav: React.FC<NavProps> = ({
           {link.name}
         </Link>
       ))}
+      {isClient && session ? (
+        <Link href="/profile">
+          <div className="h-8 w-8 overflow-hidden rounded-full">
+            <Image
+              src={session.user.image ?? "/default-avatar.png"}
+              alt="Profile"
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </Link>
+      ) : (
+        <Link
+          href="/signIn"
+          className={`capitalize ${linkStyles} text-[#6FC03B]`}
+        >
+          sign in
+        </Link>
+      )}
     </nav>
   );
 };
