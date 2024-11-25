@@ -27,7 +27,7 @@ export function UserEvents({ userId }: UserEventsProps) {
         <p className="mb-4 text-gray-500">
           You haven&apos;t created any events yet.
         </p>
-        <Link href="/events/create" className="text-primary hover:underline">
+        <Link href="/events" className="text-primary hover:underline">
           Create your first event
         </Link>
       </div>

@@ -1,4 +1,3 @@
-
 export type EventType = "cleaning" | "treePlanting" | "volunteering" | "other";
 
 export const eventTypeColors: Record<EventType, string> = {
