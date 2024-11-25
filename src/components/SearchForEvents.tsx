@@ -258,14 +258,17 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
                 className="cursor-pointer p-4 transition-colors hover:bg-gray-50"
                 onClick={() => router.push(`/events/${event.id}`)}
               >
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold">{event.name}</h3>
                   <span className="text-sm text-gray-500">
                     {event.participantsCount}/{event.maxParticipants}{" "}
                     participants
                   </span>
                 </div>
-                <p className="mt-2 text-gray-600">{event.description}</p>
+                <p className="mt-2 text-gray-600">
+                  {event.description.substring(0, 25)}
+                  {event.description.length > 25 && "..."}
+                </p>
                 <div className="mt-2 flex gap-x-4 text-sm text-gray-500">
                   <span>{event.date}</span>
                   <span>

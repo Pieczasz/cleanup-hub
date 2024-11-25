@@ -242,11 +242,14 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       mapRef.current.invalidateSize();
     }
     return () => {
-      if (mapRef.current) {
-        // Properly remove the map instance
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
+      const mapContainers =
+        document.getElementsByClassName("leaflet-container");
+      Array.from(mapContainers).forEach((container) => {
+        const elem = container as HTMLElement & { _leaflet_id?: string };
+        if (elem._leaflet_id) {
+          elem._leaflet_id = undefined;
+        }
+      });
     };
   }, []);
 
