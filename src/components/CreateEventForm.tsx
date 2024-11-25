@@ -173,7 +173,12 @@ export function CreateEventForm({
           description:
             "Event created successfully. You've been added as a participant.",
         });
-        router.push(`/events/${data.id}`);
+        // Close the dialog first
+        onClose();
+        // Wait 1 second before redirecting
+        setTimeout(() => {
+          router.push(`/events/${data.id}`);
+        }, 1000);
       } else {
         console.error("Unexpected data shape or missing event ID:", data);
         toast({
