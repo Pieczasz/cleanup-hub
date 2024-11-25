@@ -451,25 +451,6 @@ const EventPage = ({ params }: PostPageProps) => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex w-full items-center justify-center lg:hidden">
-                    <Button
-                      onClick={handleEventParticipation}
-                      className={`max-w-full rounded-3xl py-5 text-lg ${
-                        event.creatorId === session?.user.id
-                          ? "bg-red-600 hover:bg-red-600/90"
-                          : isParticipant
-                            ? "bg-red-600 hover:bg-red-600/90"
-                            : "bg-[#6AA553] hover:bg-[#6AA553]/90"
-                      }`}
-                      disabled={!session}
-                    >
-                      {event.creatorId === session?.user.id
-                        ? "Delete Event"
-                        : isParticipant
-                          ? "Leave Event"
-                          : "Join Event"}
-                    </Button>
-                  </div>
                   {showFinishButton && (
                     <Button
                       onClick={() => setShowAttendanceDialog(true)}

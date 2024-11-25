@@ -209,8 +209,8 @@ export function CreateEventForm({
           description:
             "Event updated successfully. Your changes has been saved. If you don't see the changes, please refresh the page.",
         });
-        router.refresh(); // Changed from router.reload()
-        onClose(); // Close the form after successful update
+        router.refresh();
+        onClose();
       } else {
         console.error("Unexpected data shape or missing event ID:", data);
         toast({
