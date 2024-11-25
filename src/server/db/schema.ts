@@ -1,4 +1,3 @@
-import { create } from "domain";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -115,7 +114,7 @@ export const events = createTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     title: varchar("title", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }).notNull(),
+    description: varchar("description", { length: 10000 }).notNull(),
     location: jsonb("location").notNull(),
     date: timestamp("date", {
       mode: "date",

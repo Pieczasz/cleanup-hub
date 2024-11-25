@@ -133,6 +133,62 @@ export const postRouter = createTRPCRouter({
       return event;
     }),
 
+  updateEvent: protectedProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+        title: z.string(),
+        description: z.string(),
+        date: z.date(),
+        location: z.object({
+          address: z.string(),
+          name: z.string().optional(),
+          coordinates: z.object({ lat: z.number(), lng: z.number() }),
+        }),
+        type: z.enum(["cleaning", "treePlanting", "volunteering", "other"]),
+        maxParticipants: z
+          .number()
+          .min(1, "Minimum 1 participant")
+          .max(10000, "Maximum 10,000 participants"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new Error("User ID is not available");
+      }
+
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.eventId),
+      });
+
+      if (!event) {
+        throw new Error("Event not found");
+      }
+
+      if (event.creatorId !== userId) {
+        throw new Error("Only the event creator can update this event");
+      }
+
+      const [updatedEvent] = await ctx.db
+        .update(events)
+        .set({
+          title: input.title,
+          date: input.date,
+          description: input.description,
+          location: input.location,
+          type: input.type,
+          maxParticipants: input.maxParticipants,
+        })
+        .where(sql`id = ${input.eventId}`)
+        .returning();
+
+      if (!updatedEvent) {
+        throw new Error("Failed to update the event");
+      }
+
+      return updatedEvent;
+    }),
   getEventsFromMostPopular: publicProcedure.query(async ({ ctx }) => {
     const eventsData = await ctx.db.select().from(events);
 

@@ -127,14 +127,36 @@ async function fetchCoordinatesFromAddress(address: string): Promise<{
 
 interface CreateEventFormProps {
   onClose: () => void;
+  initialData?: {
+    id: string;
+    title: string;
+    description: string;
+    date: Date;
+    location: {
+      address: string;
+      name?: string;
+      coordinates: { lat: number; lng: number };
+    };
+    type: "cleaning" | "treePlanting" | "volunteering" | "other";
+    maxParticipants: number;
+  };
+  isEditing?: boolean;
 }
 
-export function CreateEventForm({ onClose }: CreateEventFormProps) {
+export function CreateEventForm({
+  onClose,
+  initialData,
+  isEditing,
+}: CreateEventFormProps) {
   const [showMap, setShowMap] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] =
-    useState<Coordinates | null>(null);
-  const [locationName, setLocationName] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState<string>("");
+    useState<Coordinates | null>(initialData?.location.coordinates ?? null);
+  const [locationName, setLocationName] = useState(
+    initialData?.location.name ?? "",
+  );
+  const [selectedAddress, setSelectedAddress] = useState<string>(
+    initialData?.location.address ?? "",
+  );
   const [addressSuggestions, setAddressSuggestions] = useState<
     NominatimSearchResult[]
   >([]);
@@ -170,19 +192,56 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     },
   });
 
+  const updateEventMutation = api.post.updateEvent.useMutation({
+    onSuccess: (data) => {
+      if (data?.id) {
+        toast({
+          title: "Success!",
+          description:
+            "Event updated successfully. Your changes has been saved. If you don't see the changes, please refresh the page.",
+        });
+        router.refresh();
+        onClose(); // Close the form after successful update
+      } else {
+        console.error("Unexpected data shape or missing event ID:", data);
+        toast({
+          title: "Error",
+          description: "Failed to fetch event details for redirection.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      type: "cleaning",
-      location: {
-        address: "",
-        name: "",
-        coordinates: { lat: 0, lng: 0 },
-      },
-      maxParticipants: 10,
-    },
+    defaultValues: initialData
+      ? {
+          title: initialData.title,
+          description: initialData.description,
+          type: initialData.type,
+          date: initialData.date,
+          location: initialData.location,
+          maxParticipants: initialData.maxParticipants,
+        }
+      : {
+          title: "",
+          description: "",
+          type: "cleaning",
+          location: {
+            address: "",
+            name: "",
+            coordinates: { lat: 0, lng: 0 },
+          },
+          maxParticipants: 10,
+        },
   });
 
   const getSavedLocation = () => {
@@ -207,7 +266,14 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
 
   const [initialLocation, setInitialLocation] = useState<
     { coordinates: Coordinates; name?: string } | undefined
-  >(getSavedLocation() ?? undefined);
+  >(
+    initialData
+      ? {
+          coordinates: initialData.location.coordinates,
+          name: initialData.location.name,
+        }
+      : (getSavedLocation() ?? undefined),
+  );
 
   useEffect(() => {
     if (debouncedAddress) {
@@ -264,7 +330,8 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
     }
 
     localStorage.removeItem("savedLocation");
-    createEventMutation.mutate({
+
+    const eventData = {
       title: data.title,
       description: data.description,
       date: data.date,
@@ -276,7 +343,13 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
       },
       type: data.type ?? "other",
       maxParticipants: data.maxParticipants,
-    });
+    };
+
+    if (isEditing && initialData) {
+      updateEventMutation.mutate({ eventId: initialData.id, ...eventData });
+    } else {
+      createEventMutation.mutate(eventData);
+    }
   };
 
   const handleMapLocationSelect = async (location: {
@@ -485,13 +558,20 @@ export function CreateEventForm({ onClose }: CreateEventFormProps) {
               </Button>
               <Button
                 type="submit"
-                disabled={createEventMutation.status === "pending"}
+                disabled={
+                  createEventMutation.status === "pending" ||
+                  updateEventMutation.status === "pending"
+                }
                 className="min-w-[100px]"
               >
-                {createEventMutation.status === "pending" ? (
+                {createEventMutation.status === "pending" ||
+                updateEventMutation.status === "pending" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : createEventMutation.isSuccess ? (
+                ) : createEventMutation.isSuccess ||
+                  updateEventMutation.isSuccess ? (
                   <Check className="h-4 w-4" />
+                ) : isEditing ? (
+                  "Update Event"
                 ) : (
                   "Create Event"
                 )}

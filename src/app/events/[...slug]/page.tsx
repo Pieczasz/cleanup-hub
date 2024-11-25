@@ -15,6 +15,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AttendanceDialog } from "@/components/AttendanceDialog";
+import { CreateEventForm } from "@/components/CreateEventForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Functions
 import { useEffect, useState } from "react";
@@ -43,6 +50,7 @@ const EventPage = ({ params }: PostPageProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
   const [isEventOngoing, setIsEventOngoing] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   const router = useRouter();
   // Unwrap the params Promise and set the slug. This is because getting slug directly without promise will not work in future versions of Next.js
@@ -234,11 +242,9 @@ const EventPage = ({ params }: PostPageProps) => {
     return () => clearInterval(timer);
   }, [event?.date]);
 
-  const openInGoogleMaps = (address: string) => {
+  const openInGoogleMaps = (coordinates: { lat: number; lng: number }) => {
     window.open(
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        address,
-      )}`,
+      `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`,
       "_blank",
     );
   };
@@ -352,11 +358,11 @@ const EventPage = ({ params }: PostPageProps) => {
 
                   <div className="mb-8 grid gap-8 md:grid-cols-2">
                     <div className="flex flex-col gap-y-8">
-                      <div>
+                      <div className="space-y-2">
                         <h3 className="text-2xl font-semibold">
                           Event Details
                         </h3>
-                        <p className="text-lg text-gray-600">
+                        <p className="whitespace-pre-wrap break-words text-lg text-gray-600">
                           {event.description}
                         </p>
                       </div>
@@ -376,23 +382,36 @@ const EventPage = ({ params }: PostPageProps) => {
                         </div>
                       </div>
 
-                      <Button
-                        onClick={handleEventParticipation}
-                        className={`hidden max-w-full rounded-3xl py-5 text-lg md:max-w-[10rem] lg:flex ${
-                          event.creatorId === session?.user.id
-                            ? "bg-red-600 hover:bg-red-600/90"
-                            : isParticipant
-                              ? "bg-red-600 hover:bg-red-600/90"
-                              : "bg-blue-600 hover:bg-blue-600/90"
-                        }`}
-                        disabled={!session}
-                      >
-                        {event.creatorId === session?.user.id
-                          ? "Delete Event"
-                          : isParticipant
-                            ? "Leave Event"
-                            : "Join Event"}
-                      </Button>
+                      <div className="flex gap-2">
+                        {event.creatorId === session?.user.id ? (
+                          <>
+                            <Button
+                              onClick={() => setShowEditForm(true)}
+                              className="max-w-full rounded-3xl bg-yellow-600 py-5 text-lg hover:bg-yellow-600/90"
+                            >
+                              Edit Event
+                            </Button>
+                            <Button
+                              onClick={handleEventParticipation}
+                              className="max-w-full rounded-3xl bg-red-600 py-5 text-lg hover:bg-red-600/90"
+                            >
+                              Delete Event
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            onClick={handleEventParticipation}
+                            className={`max-w-full rounded-3xl py-5 text-lg ${
+                              isParticipant
+                                ? "bg-red-600 hover:bg-red-600/90"
+                                : "bg-blue-600 hover:bg-blue-600/90"
+                            }`}
+                            disabled={!session}
+                          >
+                            {isParticipant ? "Leave Event" : "Join Event"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex flex-col gap-y-8">
@@ -418,7 +437,7 @@ const EventPage = ({ params }: PostPageProps) => {
                         )}
                         <Button
                           onClick={() =>
-                            openInGoogleMaps(event.location.address)
+                            openInGoogleMaps(event.location.coordinates)
                           }
                           className="mt-3 max-w-full rounded-3xl bg-blue-600 py-5 text-lg text-white hover:bg-blue-600/90"
                         >
@@ -465,6 +484,46 @@ const EventPage = ({ params }: PostPageProps) => {
               </div>
             </>
           )
+        )}
+        {event && (
+          <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
+            {event && ( // Add this additional check
+              <DialogContent
+                className="max-h-[90vh] max-w-[800px] overflow-hidden p-0"
+                aria-describedby="edit-event-dialog-description"
+              >
+                <DialogHeader className="ml-4 mt-4">
+                  <DialogTitle>Edit Event</DialogTitle>
+                </DialogHeader>
+                <div id="edit-event-dialog-description">
+                  <CreateEventForm
+                    onClose={() => setShowEditForm(false)}
+                    initialData={{
+                      id: event.id,
+                      title: event.name,
+                      description: event.description,
+                      date: new Date(event.date),
+                      location: {
+                        address: event.location.address,
+                        name: event.location.name,
+                        coordinates: {
+                          lat: event.location.coordinates.lat,
+                          lng: event.location.coordinates.lng,
+                        },
+                      },
+                      type: event.type as
+                        | "cleaning"
+                        | "treePlanting"
+                        | "volunteering"
+                        | "other",
+                      maxParticipants: event.maxParticipants,
+                    }}
+                    isEditing={true}
+                  />
+                </div>
+              </DialogContent>
+            )}
+          </Dialog>
         )}
       </MaxWidthWrapper>
     </PageLayout>
