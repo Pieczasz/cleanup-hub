@@ -272,8 +272,16 @@ const EventPage = ({ params }: PostPageProps) => {
     }
   };
 
+  // Update the condition for showing the finish button
   const showFinishButton =
-    isEventOngoing && event?.creatorId === session?.user.id;
+    isEventOngoing &&
+    event?.creatorId === session?.user.id &&
+    !event?.isFinished;
+
+  // Add a function to check if actions are disabled
+  const isActionsDisabled = (event: Event | undefined) => {
+    return event?.isFinished ?? false;
+  };
 
   return (
     <PageLayout>
@@ -350,7 +358,7 @@ const EventPage = ({ params }: PostPageProps) => {
                       </div>
                     </div>
                     <span
-                      className={`mt-2 inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                      className={`mt-2 inline-flex rounded-full px-2 py-1 text-base font-medium ${
                         eventTypeColors[event.type as EventType]
                       }`}
                     >
@@ -387,18 +395,28 @@ const EventPage = ({ params }: PostPageProps) => {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        {showFinishButton && (
+                          <Button
+                            onClick={() => setShowAttendanceDialog(true)}
+                            className="max-w-full rounded-3xl bg-green-600 py-5 text-lg hover:bg-green-600/90"
+                          >
+                            Finish Event
+                          </Button>
+                        )}
                         {event.creatorId === session?.user.id ? (
                           <>
                             <Button
                               onClick={() => setShowEditForm(true)}
                               className="max-w-full rounded-3xl bg-yellow-600 py-5 text-lg hover:bg-yellow-600/90"
+                              disabled={isActionsDisabled(event)}
                             >
                               Edit Event
                             </Button>
                             <Button
                               onClick={handleEventParticipation}
                               className="max-w-full rounded-3xl bg-red-600 py-5 text-lg hover:bg-red-600/90"
+                              disabled={isActionsDisabled(event)}
                             >
                               Delete Event
                             </Button>
@@ -411,7 +429,7 @@ const EventPage = ({ params }: PostPageProps) => {
                                 ? "bg-red-600 hover:bg-red-600/90"
                                 : "bg-[#6AA553] hover:bg-[#6AA553]"
                             }`}
-                            disabled={!session}
+                            disabled={!session || isActionsDisabled(event)}
                           >
                             {isParticipant ? "Leave Event" : "Join Event"}
                           </Button>
@@ -451,14 +469,7 @@ const EventPage = ({ params }: PostPageProps) => {
                       </div>
                     </div>
                   </div>
-                  {showFinishButton && (
-                    <Button
-                      onClick={() => setShowAttendanceDialog(true)}
-                      className="mt-4 bg-green-600 hover:bg-green-700"
-                    >
-                      Finish Event
-                    </Button>
-                  )}
+
                   <AttendanceDialog
                     isOpen={showAttendanceDialog}
                     onClose={() => setShowAttendanceDialog(false)}

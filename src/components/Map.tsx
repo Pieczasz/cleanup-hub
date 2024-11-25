@@ -157,7 +157,7 @@ const OpenStreetMap: React.FC = () => {
                   Participants: {event.participantsCount}/
                   {event.maxParticipants}
                 </p>
-                <p className="mb-2 text-sm">
+                <p className="mb-2 text-base">
                   Type:{" "}
                   {event.type === "treePlanting"
                     ? "Tree Planting"

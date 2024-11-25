@@ -19,7 +19,7 @@ export function EventCard({ event }: { event: Event }) {
               </h3>
 
               <span
-                className={`mt-2 inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                className={`mt-2 inline-flex rounded-full px-2 py-1 text-base font-medium ${
                   eventTypeColors[event.type as EventType]
                 }`}
               >
@@ -31,11 +31,9 @@ export function EventCard({ event }: { event: Event }) {
           </div>
 
           <div className="mt-4 space-y-3">
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-base text-gray-500">
               <CalendarIcon className="mr-2 h-5 w-5" />
-              {event.type === "treePlanting"
-                ? "Tree Planting"
-                : event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
+              {event.date}
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <MapPinIcon className="mr-2 h-12 w-12" />

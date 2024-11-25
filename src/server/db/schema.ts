@@ -126,6 +126,7 @@ export const events = createTable(
     creatorId: varchar("creator_id", { length: 255 })
       .notNull()
       .references(() => users.id),
+    isFinished: boolean("is_finished").default(false).notNull(),
   },
   (event) => ({
     creatorIdIdx: index("event_creator_id_idx").on(event.creatorId),
@@ -203,6 +204,7 @@ export type Event = {
     attended: boolean;
     rating: number;
   }[];
+  isFinished: boolean;
 };
 
 export type UserEventHistory = {

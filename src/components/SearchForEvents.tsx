@@ -269,7 +269,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
                   {event.description.substring(0, 25)}
                   {event.description.length > 25 && "..."}
                 </p>
-                <div className="mt-2 flex gap-x-4 text-sm text-gray-500">
+                <div className="mt-2 flex gap-x-4 text-base text-gray-500">
                   <span>{event.date}</span>
                   <span>
                     Type:{" "}

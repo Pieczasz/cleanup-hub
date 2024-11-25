@@ -170,6 +170,10 @@ export const postRouter = createTRPCRouter({
         throw new Error("Only the event creator can update this event");
       }
 
+      if (event.isFinished) {
+        throw new Error("Cannot update a finished event");
+      }
+
       const [updatedEvent] = await ctx.db
         .update(events)
         .set({
@@ -215,6 +219,7 @@ export const postRouter = createTRPCRouter({
             address: string;
             coordinates: { lat: number; lng: number };
           },
+          isFinished: dbEvent.isFinished,
           maxParticipants: dbEvent.maxParticipants ?? 10,
           participantsCount: (dbEvent.participantIds as string[]).length,
           participantIds: dbEvent.participantIds as string[],
@@ -255,6 +260,7 @@ export const postRouter = createTRPCRouter({
           address: string;
           coordinates: { lat: number; lng: number };
         },
+        isFinished: dbEvent.isFinished,
         maxParticipants: dbEvent.maxParticipants ?? 10,
         participantsCount: (dbEvent.participantIds as string[]).length,
         participantIds: dbEvent.participantIds as string[],
@@ -272,7 +278,12 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const eventsData = await ctx.db.select().from(events);
+      // Only select unfinished events
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(eq(events.isFinished, false));
+
       const calculateDistance = (
         lat1: number,
         lng1: number,
@@ -315,6 +326,7 @@ export const postRouter = createTRPCRouter({
               address: string;
               coordinates: { lat: number; lng: number };
             },
+            isFinished: dbEvent.isFinished,
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
@@ -345,7 +357,10 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const eventsData = await ctx.db.select().from(events);
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(eq(events.isFinished, false));
 
       return eventsData
         .map((dbEvent: DBEvent): Event => {
@@ -370,6 +385,7 @@ export const postRouter = createTRPCRouter({
               address: string;
               coordinates: { lat: number; lng: number };
             },
+            isFinished: dbEvent.isFinished,
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
@@ -388,7 +404,10 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const eventsData = await ctx.db.select().from(events);
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(eq(events.isFinished, false));
 
       return eventsData
         .map((dbEvent: DBEvent): Event => {
@@ -413,6 +432,7 @@ export const postRouter = createTRPCRouter({
               address: string;
               coordinates: { lat: number; lng: number };
             },
+            isFinished: dbEvent.isFinished,
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
@@ -431,7 +451,10 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const eventsData = await ctx.db.select().from(events);
+      const eventsData = await ctx.db
+        .select()
+        .from(events)
+        .where(eq(events.isFinished, false));
 
       return eventsData
         .map((dbEvent: DBEvent): Event => {
@@ -456,6 +479,7 @@ export const postRouter = createTRPCRouter({
               address: string;
               coordinates: { lat: number; lng: number };
             },
+            isFinished: dbEvent.isFinished,
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
@@ -503,6 +527,7 @@ export const postRouter = createTRPCRouter({
               address: string;
               coordinates: { lat: number; lng: number };
             },
+            isFinished: dbEvent.isFinished,
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
@@ -520,6 +545,7 @@ export const postRouter = createTRPCRouter({
       });
 
       if (!event) throw new Error("Event not found");
+      if (event.isFinished) throw new Error("Cannot join a finished event");
 
       const participantIds = event.participantIds as string[];
       if (participantIds.includes(userId)) {
@@ -546,6 +572,7 @@ export const postRouter = createTRPCRouter({
       });
 
       if (!event) throw new Error("Event not found");
+      if (event.isFinished) throw new Error("Cannot leave a finished event");
 
       const participantIds = event.participantIds as string[];
       if (!participantIds.includes(userId)) {
@@ -572,6 +599,7 @@ export const postRouter = createTRPCRouter({
       });
 
       if (!event) throw new Error("Event not found");
+      if (event.isFinished) throw new Error("Cannot delete a finished event");
       if (event.creatorId !== userId) {
         throw new Error("Only the event creator can delete this event");
       }
@@ -611,6 +639,7 @@ export const postRouter = createTRPCRouter({
             address: string;
             coordinates: { lat: number; lng: number };
           },
+          isFinished: dbEvent.isFinished,
           maxParticipants: dbEvent.maxParticipants ?? 10,
           participantsCount: (dbEvent.participantIds as string[]).length,
           participantIds: dbEvent.participantIds as string[],
@@ -701,6 +730,13 @@ export const postRouter = createTRPCRouter({
         });
       }
 
+      if (event.isFinished) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Event is already finished",
+        });
+      }
+
       // Delete any existing attendance records for this event
       await ctx.db
         .delete(eventAttendance)
@@ -715,6 +751,12 @@ export const postRouter = createTRPCRouter({
           rating: record.rating,
         })),
       );
+
+      // Mark the event as finished
+      await ctx.db
+        .update(events)
+        .set({ isFinished: true })
+        .where(eq(events.id, input.eventId));
 
       return { success: true };
     }),
@@ -754,6 +796,7 @@ export const postRouter = createTRPCRouter({
             address: string;
             coordinates: { lat: number; lng: number };
           },
+          isFinished: dbEvent.isFinished,
           maxParticipants: dbEvent.maxParticipants ?? 10,
           participantsCount: (dbEvent.participantIds as string[]).length,
           participantIds: dbEvent.participantIds as string[],
