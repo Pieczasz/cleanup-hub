@@ -803,4 +803,16 @@ export const postRouter = createTRPCRouter({
         }),
       );
     }),
+
+  getUsersByIds: publicProcedure
+    .input(z.object({ userIds: z.array(z.string()) }))
+    .query(async ({ ctx, input }) => {
+      if (input.userIds.length === 0) return [];
+      
+      const users = await ctx.db.query.users.findMany({
+        where: (users, { inArray }) => inArray(users.id, input.userIds),
+      });
+      
+      return users;
+    }),
 });
