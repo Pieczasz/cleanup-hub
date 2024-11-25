@@ -31,8 +31,6 @@ import {
 } from "./ui/dialog";
 import { CreateEventForm } from "./CreateEventForm";
 
-// Remove FormSchema since we don't need it anymore
-
 export interface SearchForEventsRef {
   openHostEventDialog: () => void;
 }
@@ -55,7 +53,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const session = useSession();
   const [groupBy, setGroupBy] = useState<
     "Closest" | "Newest" | "Upcoming" | "MostPopular"
-  >("Closest");
+  >("Upcoming");
 
   // TRPC queries for different grouping options
   const closestEventsQuery = api.post.getClosestEvents.useQuery(
@@ -205,7 +203,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           value={groupBy}
           onValueChange={(value) =>
             setGroupBy(
-              value as "Closest" | "Newest" | "Upcoming" | "MostPopular",
+              value as "Upcoming" | "Newest" | "Closest" | "MostPopular",
             )
           }
         >
@@ -215,9 +213,9 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Group By</SelectLabel>
-              <SelectItem value="Closest">Closest Events</SelectItem>
-              <SelectItem value="Newest">Newest Events</SelectItem>
               <SelectItem value="Upcoming">Upcoming Events</SelectItem>
+              <SelectItem value="Newest">Newest Events</SelectItem>
+              <SelectItem value="Closest">Closest Events</SelectItem>
               <SelectItem value="MostPopular">Most Popular Events</SelectItem>
             </SelectGroup>
           </SelectContent>

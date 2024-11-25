@@ -217,7 +217,6 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const eventsData = await ctx.db.select().from(events);
-
       const calculateDistance = (
         lat1: number,
         lng1: number,
@@ -227,7 +226,7 @@ export const postRouter = createTRPCRouter({
         const toRad = (value: number) => (value * Math.PI) / 180;
         const R = 6371; // Radius of the Earth in km
         const dLat = toRad(lat2 - lat1);
-        const dLng = toRad(lat2 - lng1);
+        const dLng = toRad(lng2 - lng1);
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos(toRad(lat1)) *
@@ -237,7 +236,6 @@ export const postRouter = createTRPCRouter({
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       };
-
       const sortedEvents = eventsData
         .map((dbEvent: DBEvent): Event => {
           return {
@@ -281,7 +279,6 @@ export const postRouter = createTRPCRouter({
           };
         })
         .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
       return sortedEvents.slice(input.offset, input.offset + input.limit);
     }),
   getNewestEvents: publicProcedure
