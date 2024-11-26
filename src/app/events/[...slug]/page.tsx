@@ -107,6 +107,12 @@ const EventPage = ({ params }: PostPageProps) => {
     },
   );
 
+  // Add near the top with other queries
+  const { data: eventAttendance } = api.post.getEventAttendance.useQuery(
+    { eventId: event?.id ?? "" },
+    { enabled: !!event?.id && event?.isFinished },
+  );
+
   const utils = api.useContext();
   const { mutate: joinEvent } = api.post.joinEvent.useMutation({
     onSuccess: () => {
@@ -283,12 +289,68 @@ const EventPage = ({ params }: PostPageProps) => {
     return event?.isFinished ?? false;
   };
 
+  // Add this function before the return statement
+  const getEventStatusText = () => {
+    if (event?.isFinished) {
+      return "This event has already been finished";
+    }
+    if (isEventOngoing) {
+      return "The event is ongoing";
+    }
+    return `Time until event: ${timeLeft}`;
+  };
+
   return (
     <PageLayout>
       <MaxWidthWrapper>
         {isLoading ? (
-          <div className="flex justify-center p-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          <div className="w-full py-12">
+            <div className="rounded-lg bg-white px-4 sm:px-6 lg:px-8">
+              {/* Header skeleton */}
+              <div className="mb-8 border-b pb-6">
+                <div className="flex flex-col items-start justify-between lg:flex-row lg:items-center">
+                  <div className="h-12 w-3/4 animate-pulse rounded-lg bg-gray-200 sm:h-16"></div>
+                  <div className="mt-4 flex items-center gap-2 sm:mt-0">
+                    <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200"></div>
+                    <div className="h-6 w-32 animate-pulse rounded-lg bg-gray-200"></div>
+                  </div>
+                </div>
+                <div className="mt-4 h-6 w-24 animate-pulse rounded-full bg-gray-200"></div>
+              </div>
+
+              {/* Content skeleton */}
+              <div className="mb-8 grid gap-8 md:grid-cols-2">
+                <div className="flex flex-col gap-y-8">
+                  <div className="space-y-2">
+                    <div className="h-8 w-40 animate-pulse rounded-lg bg-gray-200"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 w-full animate-pulse rounded bg-gray-200"></div>
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200"></div>
+                      <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="h-8 w-40 animate-pulse rounded-lg bg-gray-200"></div>
+                    <div className="mt-2 h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+                    <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-gray-200"></div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-y-8">
+                  <div>
+                    <div className="h-8 w-40 animate-pulse rounded-lg bg-gray-200"></div>
+                    <div className="mt-2 h-4 w-48 animate-pulse rounded bg-gray-200"></div>
+                  </div>
+
+                  <div>
+                    <div className="h-8 w-40 animate-pulse rounded-lg bg-gray-200"></div>
+                    <div className="mt-2 h-4 w-64 animate-pulse rounded bg-gray-200"></div>
+                    <div className="mt-3 h-10 w-48 animate-pulse rounded-3xl bg-gray-200"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : error ? (
           <p className="text-center text-xl font-semibold text-red-500">
@@ -321,20 +383,20 @@ const EventPage = ({ params }: PostPageProps) => {
                 </AlertDialogContent>
               </AlertDialog>
 
-              <div className="w-full py-12">
+              <div className="w-full py-6 sm:py-12">
                 <div className="rounded-lg bg-white px-4 sm:px-6 lg:px-8">
-                  <div className="mb-8 border-b pb-6">
-                    <div className="flex flex-col items-start justify-between lg:flex-row lg:items-center">
-                      <h2 className="text-3xl font-bold text-gray-800 sm:text-5xl">
+                  <div className="mb-6 border-b pb-4 sm:mb-8 sm:pb-6">
+                    <div className="flex flex-col items-start gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
+                      <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl lg:text-5xl">
                         {event.name}
                       </h2>
-                      <div className="mt-4 flex items-center gap-2 sm:mt-0">
+                      <div className="flex items-center gap-2">
                         <Image
                           src={creator?.image ?? "/defaultAvatar.jpg"}
                           width={40}
                           height={40}
                           alt="Creator Avatar"
-                          className="rounded-full hover:cursor-pointer"
+                          className="h-8 w-8 rounded-full hover:cursor-pointer sm:h-10 sm:w-10"
                           onClick={() => {
                             if (session?.user.id === creator?.id) {
                               router.push("/profile");
@@ -344,7 +406,7 @@ const EventPage = ({ params }: PostPageProps) => {
                           }}
                         />
                         <span
-                          className="text-lg font-medium hover:cursor-pointer"
+                          className="text-base font-medium hover:cursor-pointer sm:text-lg"
                           onClick={() => {
                             if (session?.user.id === creator?.id) {
                               router.push("/profile");
@@ -358,7 +420,7 @@ const EventPage = ({ params }: PostPageProps) => {
                       </div>
                     </div>
                     <span
-                      className={`mt-2 inline-flex rounded-full px-2 py-1 text-base font-medium ${
+                      className={`mt-2 inline-flex rounded-full px-2 py-1 text-sm font-medium sm:text-base ${
                         eventTypeColors[event.type as EventType]
                       }`}
                     >
@@ -369,19 +431,23 @@ const EventPage = ({ params }: PostPageProps) => {
                     </span>
                   </div>
 
-                  <div className="mb-8 grid gap-8 md:grid-cols-2">
-                    <div className="flex flex-col gap-y-8">
+                  <div className="mb-6 grid gap-6 sm:mb-8 sm:gap-8 md:grid-cols-2">
+                    <div className="flex flex-col gap-y-6 sm:gap-y-8">
                       <div className="space-y-2">
-                        <h3 className="text-2xl font-semibold">
+                        <h3 className="text-xl font-semibold sm:text-2xl">
                           Event Details
                         </h3>
-                        <p className="whitespace-pre-wrap break-words text-lg text-gray-600">
-                          {event.description}
-                        </p>
+                        <div>
+                          <p className="max-w-[33ch] whitespace-pre-line break-words text-base text-gray-600 sm:text-lg lg:max-w-prose">
+                            {event.description}
+                          </p>
+                        </div>
                       </div>
                       <div>
-                        <h4 className="text-2xl font-semibold">Participants</h4>
-                        <p className="text-lg text-gray-600">
+                        <h4 className="text-xl font-semibold sm:text-2xl">
+                          Participants
+                        </h4>
+                        <p className="text-base text-gray-600 sm:text-lg">
                           {event.participantsCount} / {event.maxParticipants}{" "}
                           joined
                         </p>
@@ -395,11 +461,19 @@ const EventPage = ({ params }: PostPageProps) => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        {event.isFinished && (
+                          <Button
+                            onClick={() => setShowAttendanceDialog(true)}
+                            className="w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg"
+                          >
+                            Show Attendance
+                          </Button>
+                        )}
                         {showFinishButton && (
                           <Button
                             onClick={() => setShowAttendanceDialog(true)}
-                            className="max-w-full rounded-3xl bg-green-600 py-5 text-lg hover:bg-green-600/90"
+                            className="w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg"
                           >
                             Finish Event
                           </Button>
@@ -408,14 +482,14 @@ const EventPage = ({ params }: PostPageProps) => {
                           <>
                             <Button
                               onClick={() => setShowEditForm(true)}
-                              className="max-w-full rounded-3xl bg-yellow-600 py-5 text-lg hover:bg-yellow-600/90"
+                              className="w-full rounded-3xl bg-yellow-600 py-4 text-base hover:bg-yellow-600/90 sm:w-auto sm:py-5 sm:text-lg"
                               disabled={isActionsDisabled(event)}
                             >
                               Edit Event
                             </Button>
                             <Button
                               onClick={handleEventParticipation}
-                              className="max-w-full rounded-3xl bg-red-600 py-5 text-lg hover:bg-red-600/90"
+                              className="w-full rounded-3xl bg-red-600 py-4 text-base hover:bg-red-600/90 sm:w-auto sm:py-5 sm:text-lg"
                               disabled={isActionsDisabled(event)}
                             >
                               Delete Event
@@ -424,7 +498,7 @@ const EventPage = ({ params }: PostPageProps) => {
                         ) : (
                           <Button
                             onClick={handleEventParticipation}
-                            className={`max-w-full rounded-3xl py-5 text-lg ${
+                            className={`w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg ${
                               isParticipant
                                 ? "bg-red-600 hover:bg-red-600/90"
                                 : "bg-[#6AA553] hover:bg-[#6AA553]"
@@ -437,24 +511,28 @@ const EventPage = ({ params }: PostPageProps) => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-y-8">
+                    <div className="flex flex-col gap-y-6 sm:gap-y-8">
                       <div>
-                        <h4 className="text-2xl font-semibold">Date & Time</h4>
-                        <p className="text-lg text-gray-600">
+                        <h4 className="text-xl font-semibold sm:text-2xl">
+                          Date & Time
+                        </h4>
+                        <p className="text-base text-gray-600 sm:text-lg">
                           {new Date(event.date).toLocaleString()}
                         </p>
-                        <p className="mt-2 text-base font-medium text-green-800">
-                          Time until event: {timeLeft}
+                        <p className="mt-2 text-sm font-medium text-green-800 sm:text-base">
+                          {getEventStatusText()}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="text-2xl font-semibold">Location</h4>
-                        <p className="text-lg text-gray-600">
+                        <h4 className="text-xl font-semibold sm:text-2xl">
+                          Location
+                        </h4>
+                        <p className="max-w-prose break-words text-base text-gray-600 sm:text-lg">
                           {event.location.address}
                         </p>
                         {event.location.name && (
-                          <p className="text-lg text-gray-600">
+                          <p className="max-w-prose break-words text-base text-gray-600 sm:text-lg">
                             {event.location.name}
                           </p>
                         )}
@@ -462,7 +540,7 @@ const EventPage = ({ params }: PostPageProps) => {
                           onClick={() =>
                             openInGoogleMaps(event.location.coordinates)
                           }
-                          className="mt-3 max-w-full rounded-3xl py-5 text-lg"
+                          className="mt-3 w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg"
                         >
                           Open in Google Maps
                         </Button>
@@ -476,6 +554,8 @@ const EventPage = ({ params }: PostPageProps) => {
                     participants={participants ?? []}
                     onSubmit={handleAttendanceSubmit}
                     isSubmitting={isSubmittingAttendance}
+                    viewOnly={event.isFinished}
+                    attendance={eventAttendance}
                   />
                 </div>
               </div>

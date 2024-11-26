@@ -17,7 +17,11 @@ export function EventCard({ event }: { event: Event }) {
               <h3 className="text-xl font-semibold text-gray-900">
                 {event.name}
               </h3>
-
+              {event.isFinished && (
+                <p className="mt-1 text-sm text-green-800">
+                  This event has been already finished
+                </p>
+              )}
               <span
                 className={`mt-2 inline-flex rounded-full px-2 py-1 text-base font-medium ${
                   eventTypeColors[event.type as EventType]
