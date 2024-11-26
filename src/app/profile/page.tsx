@@ -7,12 +7,23 @@ import { UserEvents } from "@/components/UserEvents";
 import PageLayout from "@/components/PageLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { UserParticipatedEvents } from "@/components/UserParticipatedEvents";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Functions
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 
 export default function Account() {
   const { data: session, status } = useSession();
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   if (status === "loading") {
     return (
@@ -24,35 +35,72 @@ export default function Account() {
     );
   }
 
+  const handleSignOut = () => {
+    void signOut();
+    setShowSignOutDialog(false);
+  };
+
   return (
     <PageLayout>
       <MaxWidthWrapper>
         <div className="w-full">
-          <div>
-            <h1 className="mb-12 text-3xl font-bold sm:mb-6">My Profile</h1>
-            <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="mb-4 flex w-full flex-col gap-2 sm:flex-row">
-                <TabsTrigger value="profile" className="w-full">
-                  Profile Settings
-                </TabsTrigger>
-                <TabsTrigger value="events" className="w-full">
-                  My Events
-                </TabsTrigger>
-                <TabsTrigger value="participated" className="w-full">
-                  Participated Events
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="profile">
-                <AccountForm session={session} />
-              </TabsContent>
-              <TabsContent value="events">
-                <UserEvents userId={session?.user.id} />
-              </TabsContent>
-              <TabsContent value="participated">
-                <UserParticipatedEvents userId={session?.user.id} />
-              </TabsContent>
-            </Tabs>
+          <div className="mb-8 flex items-center justify-between">
+            <h1 className="text-3xl font-bold sm:mb-6">My Profile</h1>
+            <Button
+              variant="destructive"
+              onClick={() => setShowSignOutDialog(true)}
+              className="ml-auto"
+            >
+              Sign Out
+            </Button>
+
+            <Dialog
+              open={showSignOutDialog}
+              onOpenChange={setShowSignOutDialog}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Sign Out</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to sign out?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSignOutDialog(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="mb-4 flex w-full flex-col gap-2 sm:flex-row">
+              <TabsTrigger value="profile" className="w-full">
+                Profile Settings
+              </TabsTrigger>
+              <TabsTrigger value="events" className="w-full">
+                My Events
+              </TabsTrigger>
+              <TabsTrigger value="participated" className="w-full">
+                Participated Events
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile">
+              <AccountForm session={session} />
+            </TabsContent>
+            <TabsContent value="events">
+              <UserEvents userId={session?.user.id} />
+            </TabsContent>
+            <TabsContent value="participated">
+              <UserParticipatedEvents userId={session?.user.id} />
+            </TabsContent>
+          </Tabs>
         </div>
       </MaxWidthWrapper>
     </PageLayout>

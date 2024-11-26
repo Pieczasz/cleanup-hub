@@ -36,7 +36,8 @@ export default function EditProfileForm({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Profile updated successfully!",
+        description:
+          "Profile updated successfully! To see changes, sign out and sign in again.",
       });
       router.refresh();
       onCancel();
@@ -77,7 +78,8 @@ export default function EditProfileForm({
       await updateUser.mutateAsync({ image: url });
       toast({
         title: "Success",
-        description: "Profile picture updated!",
+        description:
+          "Profile picture updated! To see changes, sign out and sign in again.",
       });
     } catch (error) {
       toast({
