@@ -15,11 +15,12 @@ const HowYouCanGetInvolved = () => {
     // Navigate to the Events page first
     router.push("/events");
 
-    // Use a small delay to ensure the page is loaded before opening the dialog
-    setTimeout(() => {
-      // Dispatch a custom event that the Events page can listen for
-      window.dispatchEvent(new CustomEvent("open-host-event-dialog"));
-    }, 100);
+    // TODO: Open the dialog to host an event
+    // // Use a small delay to ensure the page is loaded before opening the dialog
+    // setTimeout(() => {
+    //   // Dispatch a custom event that the Events page can listen for
+    //   window.dispatchEvent(new CustomEvent("open-host-event-dialog"));
+    // }, 100);
   };
 
   return (
