@@ -1,6 +1,13 @@
 // Functions
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import type {
+  Account,
+  Profile,
+  User,
+  DefaultSession,
+  NextAuthConfig,
+} from "next-auth";
 import { env } from "@/env";
+import type { JWT } from "next-auth/jwt";
 
 // Database
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -12,11 +19,15 @@ import bcrypt, { hash } from "bcryptjs";
 // Providers
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import type { AdapterUser } from "next-auth/adapters";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      image?: string | null;
+      name?: string | null;
+      email?: string | null;
     } & DefaultSession["user"];
   }
 }
@@ -83,15 +94,43 @@ export const authConfig: NextAuthConfig = {
   ],
   adapter: DrizzleAdapter(db),
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({
+      token,
+      user,
+      trigger,
+      session,
+    }: {
+      token: JWT;
+      user?: User | AdapterUser;
+      account: Account | null;
+      profile?: Profile;
+      trigger?: "signIn" | "signUp" | "update";
+      isNewUser?: boolean;
+      session?: { user?: { name?: string | null; image?: string | null } };
+    }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
       }
+
+      // Handle updates to the session
+      if (trigger === "update" && session) {
+        if (session.user) {
+          token.name = session.user.name;
+          token.picture = session.user.image;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub ?? (token.id as string);
+        session.user.name = token.name!;
+        session.user.email = token.email!;
+        session.user.image = token.picture!;
       }
       return session;
     },

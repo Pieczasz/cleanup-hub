@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Link href="/profile" className="flex items-center gap-x-2" onClick={onLinkClick}>
             <div className="h-8 w-8 overflow-hidden rounded-full">
               <Image
-                src={session.user.image ?? "/default-avatar.png"}
+                src={session.user.image ?? "/defaultAvatar.png"}
                 alt="Profile"
                 width={32}
                 height={32}

@@ -11,6 +11,7 @@ import { useState } from "react";
 import type { Session } from "next-auth";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Hooks
 import { useToast } from "@/hooks/use-toast";
@@ -18,11 +19,13 @@ import { useToast } from "@/hooks/use-toast";
 interface EditProfileFormProps {
   session: Session | null;
   onCancel: () => void;
+  onSuccess: () => void;
 }
 
 export default function EditProfileForm({
   session,
   onCancel,
+  onSuccess,
 }: EditProfileFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [name, setName] = useState(
@@ -31,16 +34,25 @@ export default function EditProfileForm({
   const router = useRouter();
   const user = session?.user;
   const { toast } = useToast();
+  const { update: updateSession } = useSession();
 
   const updateUser = api.post.updateUser.useMutation({
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      // Update the session with new user data
+      await updateSession({
+        user: {
+          name: data.name,
+          image: data.image,
+        }
+      });
+      
       toast({
         title: "Success",
-        description:
-          "Profile updated successfully! To see changes, sign out and sign in again.",
+        description: "Profile updated successfully!",
       });
+      
       router.refresh();
-      onCancel();
+      onSuccess();
     },
     onError: (error) => {
       toast({
@@ -79,8 +91,9 @@ export default function EditProfileForm({
       toast({
         title: "Success",
         description:
-          "Profile picture updated! To see changes, sign out and sign in again.",
+          "Profile picture updated successfully!",
       });
+      onSuccess();
     } catch (error) {
       toast({
         title: "Error",

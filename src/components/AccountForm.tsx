@@ -1,21 +1,30 @@
 "use client";
 
-// Components
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import EditProfileForm from "./EditProfileForm";
 
-// Functions
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Session } from "next-auth";
 
 interface ProfileProps {
   session: Session | null;
 }
 
-export default function Profile({ session }: ProfileProps) {
+export default function Profile({ session: initialSession }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const user = session?.user;
+  const { data: session, update: updateSession } = useSession();
+  const user = session?.user ?? initialSession?.user;
+
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force refresh when session changes
+  useEffect(() => {
+    if (session) {
+      setForceUpdate((prev) => prev + 1);
+    }
+  }, [session]);
 
   if (!user) {
     return (
@@ -27,7 +36,14 @@ export default function Profile({ session }: ProfileProps) {
 
   if (isEditing) {
     return (
-      <EditProfileForm session={session} onCancel={() => setIsEditing(false)} />
+      <EditProfileForm
+        session={session}
+        onCancel={() => setIsEditing(false)}
+        onSuccess={() => {
+          void updateSession();
+          setIsEditing(false);
+        }}
+      />
     );
   }
 
@@ -37,7 +53,7 @@ export default function Profile({ session }: ProfileProps) {
         <div className="relative h-24 w-24 rounded-full">
           {user.image ? (
             <Image
-              src={user.image}
+              src={`${user.image}?v=${forceUpdate}`}
               alt="Profile"
               className="rounded-full object-cover"
               width={96}
