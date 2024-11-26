@@ -39,11 +39,11 @@ export function EventCard({ event }: { event: Event }) {
               <CalendarIcon className="mr-2 h-5 w-5" />
               {event.date}
             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <MapPinIcon className="mr-2 h-12 w-12" />
+            <div className="flex items-center text-base text-gray-500">
+              <MapPinIcon className="mr-2 h-5 w-5" />
               {event.location.address}
             </div>
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-base text-gray-500">
               <UsersIcon className="mr-2 h-5 w-5" />
               {event.participantsCount} / {event.maxParticipants} participants
             </div>

@@ -43,14 +43,14 @@ export default function EditProfileForm({
         user: {
           name: data.name,
           image: data.image,
-        }
+        },
       });
-      
+
       toast({
         title: "Success",
         description: "Profile updated successfully!",
       });
-      
+
       router.refresh();
       onSuccess();
     },
@@ -90,8 +90,7 @@ export default function EditProfileForm({
       await updateUser.mutateAsync({ image: url });
       toast({
         title: "Success",
-        description:
-          "Profile picture updated successfully!",
+        description: "Profile picture updated successfully!",
       });
       onSuccess();
     } catch (error) {

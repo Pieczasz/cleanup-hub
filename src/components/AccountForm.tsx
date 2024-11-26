@@ -50,21 +50,6 @@ export default function Profile({ session: initialSession }: ProfileProps) {
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center gap-6">
-        <div className="relative h-24 w-24 rounded-full">
-          {user.image ? (
-            <Image
-              src={`${user.image}?v=${forceUpdate}`}
-              alt="Profile"
-              className="rounded-full object-cover"
-              width={96}
-              height={96}
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              No image
-            </div>
-          )}
-        </div>
         <div className="flex-1">
           <h2 className="mb-2 text-xl font-semibold">
             {user.name ?? user.email}
