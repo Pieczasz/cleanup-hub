@@ -3,7 +3,7 @@
 // Components
 import AccountForm from "@/components/AccountForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserEvents } from "@/components/UserEvents";
+
 import PageLayout from "@/components/PageLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { UserParticipatedEvents } from "@/components/UserParticipatedEvents";
@@ -21,6 +21,9 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { UserEvents } from "@/components/UserEvents";
+import { ParticipatingInEvents } from "@/components/ParticipatingInEvents";
+import { PastUserEvents } from "@/components/PastUserEvents";
 
 export default function Account() {
   const { data: session, status } = useSession();
@@ -99,8 +102,11 @@ export default function Account() {
               <TabsTrigger value="events" className="w-full">
                 My Events
               </TabsTrigger>
-              <TabsTrigger value="participated" className="w-full">
-                Participated Events
+              <TabsTrigger value="participating" className="w-full">
+                Participating in Events
+              </TabsTrigger>
+              <TabsTrigger value="past" className="w-full">
+                Past Events
               </TabsTrigger>
             </TabsList>
             <TabsContent value="profile">
@@ -109,8 +115,11 @@ export default function Account() {
             <TabsContent value="events">
               <UserEvents userId={session?.user.id} />
             </TabsContent>
-            <TabsContent value="participated">
-              <UserParticipatedEvents userId={session?.user.id} />
+            <TabsContent value="participating">
+              <ParticipatingInEvents userId={session?.user.id} />
+            </TabsContent>
+            <TabsContent value="past">
+              <PastUserEvents userId={session?.user.id} />
             </TabsContent>
           </Tabs>
         </div>

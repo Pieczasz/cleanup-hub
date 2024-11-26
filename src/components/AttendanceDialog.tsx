@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "./ui/dialog";
 import { Checkbox } from "./ui/checkbox";
@@ -51,6 +50,8 @@ export const AttendanceDialog = ({
     Map<string, { attended: boolean; rating: number }>
   >(new Map(participants.map((p) => [p.id, { attended: false, rating: 0 }])));
 
+  const [hoverRatings, setHoverRatings] = useState<Map<string, number>>(new Map());
+
   // Reset attendance when dialog opens with new participants
   useEffect(() => {
     if (isOpen) {
@@ -85,6 +86,16 @@ export const AttendanceDialog = ({
     );
   };
 
+  const handleStarHover = (userId: string, rating: number) => {
+    setHoverRatings(new Map(hoverRatings.set(userId, rating)));
+  };
+
+  const handleStarLeave = (userId: string) => {
+    const newHoverRatings = new Map(hoverRatings);
+    newHoverRatings.delete(userId);
+    setHoverRatings(newHoverRatings);
+  };
+
   const handleSubmit = () => {
     const attendanceData = Array.from(attendanceState.entries()).map(
       ([userId, data]) => ({
@@ -108,7 +119,10 @@ export const AttendanceDialog = ({
           {viewOnly ? (
             <div className="space-y-3 sm:space-y-4">
               {attendance?.map((record) => (
-                <div key={record.userId} className="flex items-center gap-2 sm:gap-4">
+                <div
+                  key={record.userId}
+                  className="flex items-center gap-2 sm:gap-4"
+                >
                   <Image
                     src={record.userImage ?? "/defaultAvatar.jpg"}
                     width={32}
@@ -117,9 +131,12 @@ export const AttendanceDialog = ({
                     className="h-8 w-8 rounded-full sm:h-10 sm:w-10"
                   />
                   <div className="flex-grow">
-                    <p className="text-sm font-medium sm:text-base">{record.userName ?? "Unknown User"}</p>
+                    <p className="text-sm font-medium sm:text-base">
+                      {record.userName ?? "Unknown User"}
+                    </p>
                     <p className="text-xs text-gray-600 sm:text-sm">
-                      {record.attended ? "Attended" : "Did not attend"} • Rating: {record.rating}/5
+                      {record.attended ? "Attended" : "Did not attend"} •
+                      Rating: {record.rating}/5
                     </p>
                   </div>
                 </div>
@@ -134,9 +151,14 @@ export const AttendanceDialog = ({
                 >
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     <Checkbox
-                      checked={attendanceState.get(participant.id)?.attended ?? false}
+                      checked={
+                        attendanceState.get(participant.id)?.attended ?? false
+                      }
                       onCheckedChange={(checked) =>
-                        handleAttendanceChange(participant.id, checked as boolean)
+                        handleAttendanceChange(
+                          participant.id,
+                          checked as boolean,
+                        )
                       }
                       disabled={isSubmitting}
                       className="h-4 w-4 sm:h-5 sm:w-5"
@@ -148,20 +170,25 @@ export const AttendanceDialog = ({
                       alt={participant.name ?? "Participant"}
                       className="h-8 w-8 rounded-full sm:h-10 sm:w-10"
                     />
-                    <span className="text-sm sm:text-base">{participant.name ?? "Unknown Participant"}</span>
+                    <span className="text-sm sm:text-base">
+                      {participant.name ?? "Unknown Participant"}
+                    </span>
                   </div>
                   <div className="flex space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <StarIcon
                         key={star}
-                        className={`h-5 w-5 cursor-pointer sm:h-6 sm:w-6 ${
-                          (attendanceState.get(participant.id)?.rating ?? 0) >= star
+                        className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
+                          (hoverRatings.get(participant.id) ?? attendanceState.get(participant.id)?.rating ?? 0) >= star
                             ? "text-yellow-400"
                             : "text-gray-300"
                         } ${isSubmitting ? "opacity-50" : "hover:text-yellow-400"}`}
                         onClick={() =>
-                          !isSubmitting && handleRatingChange(participant.id, star)
+                          !isSubmitting &&
+                          handleRatingChange(participant.id, star)
                         }
+                        onMouseEnter={() => !isSubmitting && handleStarHover(participant.id, star)}
+                        onMouseLeave={() => !isSubmitting && handleStarLeave(participant.id)}
                       />
                     ))}
                   </div>
@@ -172,8 +199,8 @@ export const AttendanceDialog = ({
         </div>
         <DialogFooter>
           {!viewOnly && (
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               disabled={isSubmitting}
               className="w-full sm:w-auto"
             >

@@ -31,32 +31,16 @@ const EventCardSkeleton = () => (
   </div>
 );
 
-// If this component exists, you can update it or replace it with `ParticipatingInEvents`
-export function UserParticipatedEvents({ userId }: { userId?: string }) {
-  if (!userId) {
-    return (
-      <div className="text-center text-gray-500">
-        Please log in to view your participated events.
-      </div>
-    );
-  }
+interface ParticipatingInEventsProps {
+  userId?: string;
+}
 
-  const {
-    data: events,
-    isLoading,
-    error,
-  } = api.post.getUserParticipatedEvents.useQuery(
-    { userId },
-    { enabled: true },
-  );
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500">
-        Error loading events: {error.message}
-      </div>
+export function ParticipatingInEvents({ userId }: ParticipatingInEventsProps) {
+  const { data: events, isLoading } =
+    api.post.getUserParticipatedEvents.useQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId },
     );
-  }
 
   if (isLoading) {
     return (
@@ -68,17 +52,19 @@ export function UserParticipatedEvents({ userId }: { userId?: string }) {
     );
   }
 
-  if (!events || events.length === 0) {
+  if (!events?.length) {
     return (
-      <div className="text-center text-gray-500">
-        You are not participating in any upcoming events.
+      <div className="mt-12 py-8 text-center sm:mt-0">
+        <p className="text-gray-500">
+          You are not participating in any upcoming events.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="mt-12 grid grid-cols-1 gap-4 sm:mt-0 sm:grid-cols-2 lg:grid-cols-3">
-      {events?.map((event) => (
+    <div className="mt-0 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}
     </div>

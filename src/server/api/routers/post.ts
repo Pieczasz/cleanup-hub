@@ -765,12 +765,12 @@ export const postRouter = createTRPCRouter({
   getUserParticipatedEvents: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const currentDate = new Date().toISOString();
+      const currentDate = new Date();
       const eventsData = await ctx.db
         .select()
         .from(events)
         .where(
-          sql`${events.date}::text > ${currentDate} AND ${
+          sql`${events.date} > ${currentDate.toISOString()} AND ${
             events.participantIds
           } @> ${JSON.stringify([input.userId])}::jsonb`,
         )
@@ -783,16 +783,7 @@ export const postRouter = createTRPCRouter({
           creatorId: dbEvent.creatorId,
           type: dbEvent.type,
           description: dbEvent.description,
-          date: dbEvent.date
-            ? dbEvent.date.toISOString().split("T")[0] +
-              " " +
-              dbEvent.date
-                .toISOString()
-                .split("T")[1]
-                ?.split(":")
-                .slice(0, 2)
-                .join(":")
-            : "",
+          date: dbEvent.date ? dbEvent.date.toISOString() : "",
           location: dbEvent.location as {
             name: string;
             address: string;
@@ -835,5 +826,33 @@ export const postRouter = createTRPCRouter({
         .orderBy(eventAttendance.userId);
 
       return attendanceRecords;
+    }),
+
+  getUserRating: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const attendanceRecords = await ctx.db
+        .select({
+          rating: eventAttendance.rating,
+        })
+        .from(eventAttendance)
+        .where(
+          sql`${eventAttendance.userId} = ${input.userId} AND ${eventAttendance.attended} = true`,
+        );
+
+      if (attendanceRecords.length === 0) {
+        return null;
+      }
+
+      const totalRating = attendanceRecords.reduce(
+        (sum, record) => sum + record.rating,
+        0,
+      );
+      const averageRating = totalRating / attendanceRecords.length;
+
+      return {
+        average: Number(averageRating.toFixed(2)),
+        totalRatings: attendanceRecords.length,
+      };
     }),
 });
