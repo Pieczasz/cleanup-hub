@@ -19,11 +19,20 @@ import {
 
 // Functions
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Account() {
   const { data: session, status } = useSession();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const router = useRouter();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status !== "loading" && !session) {
+      router.push("/signIn");
+    }
+  }, [session, status, router]);
 
   if (status === "loading") {
     return (
@@ -35,9 +44,10 @@ export default function Account() {
     );
   }
 
-  const handleSignOut = () => {
-    void signOut();
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
     setShowSignOutDialog(false);
+    router.push("/");
   };
 
   return (
@@ -46,13 +56,15 @@ export default function Account() {
         <div className="w-full">
           <div className="mb-8 flex items-center justify-between">
             <h1 className="text-3xl font-bold sm:mb-6">My Profile</h1>
-            <Button
-              variant="destructive"
-              onClick={() => setShowSignOutDialog(true)}
-              className="ml-auto"
-            >
-              Sign Out
-            </Button>
+            {session && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowSignOutDialog(true)}
+                className="ml-auto"
+              >
+                Sign Out
+              </Button>
+            )}
 
             <Dialog
               open={showSignOutDialog}
