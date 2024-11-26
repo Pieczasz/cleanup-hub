@@ -90,11 +90,11 @@ const OpenStreetMap: React.FC = () => {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const { data: events } = api.post.getEventsFromMostPopular.useQuery();
-  const { data: creator } = api.post.getUserById.useQuery(
-    {
-      id: events?.[0]?.creatorId ?? "",
-    },
-    { enabled: !!events?.[0]?.creatorId },
+  
+  // Replace the single creator query with a query for all creators
+  const { data: usersData } = api.post.getUsersByIds.useQuery(
+    { userIds: events?.map((event) => event.creatorId) ?? [] },
+    { enabled: !!events }
   );
 
   // Handle map cleanup
@@ -129,51 +129,56 @@ const OpenStreetMap: React.FC = () => {
           url={`https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token=${accessToken}`}
         />
 
-        {events?.map((event) => (
-          <Marker
-            key={event.id}
-            position={[
-              event.location.coordinates.lat,
-              event.location.coordinates.lng,
-            ]}
-            icon={customIcon}
-          >
-            <Popup>
-              <div className="rounded-lg p-4">
-                <h3 className="mb-2 text-xl font-semibold">{event.name}</h3>
-                <div className="mb-2 flex items-center">
-                  <Image
-                    src={creator?.image ?? "/defaultAvatar.jpg"}
-                    width={32}
-                    height={32}
-                    alt="Creator Avatar"
-                    className="mr-2 h-8 w-8 rounded-full"
-                  />
-                  <span className="text-sm font-medium">
-                    {creator?.name ?? "Unknown"}
-                  </span>
+        {events?.map((event) => {
+          // Find the creator for this event
+          const creator = usersData?.find(user => user.id === event.creatorId);
+          
+          return (
+            <Marker
+              key={event.id}
+              position={[
+                event.location.coordinates.lat,
+                event.location.coordinates.lng,
+              ]}
+              icon={customIcon}
+            >
+              <Popup>
+                <div className="rounded-lg p-4">
+                  <h3 className="mb-2 text-xl font-semibold">{event.name}</h3>
+                  <div className="mb-2 flex items-center">
+                    <Image
+                      src={creator?.image ?? "/defaultAvatar.jpg"}
+                      width={32}
+                      height={32}
+                      alt="Creator Avatar"
+                      className="mr-2 h-8 w-8 rounded-full"
+                    />
+                    <span className="text-sm font-medium">
+                      {creator?.name ?? "Unknown"}
+                    </span>
+                  </div>
+                  <p className="mb-2 text-sm">
+                    Participants: {event.participantsCount}/
+                    {event.maxParticipants}
+                  </p>
+                  <p className="mb-2 text-base">
+                    Type:{" "}
+                    {event.type === "treePlanting"
+                      ? "Tree Planting"
+                      : event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
+                  </p>
+                  <p>Date: {event.date}</p>
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="text-base text-blue-500"
+                  >
+                    Read More About This Event!
+                  </Link>
                 </div>
-                <p className="mb-2 text-sm">
-                  Participants: {event.participantsCount}/
-                  {event.maxParticipants}
-                </p>
-                <p className="mb-2 text-base">
-                  Type:{" "}
-                  {event.type === "treePlanting"
-                    ? "Tree Planting"
-                    : event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
-                </p>
-                <p>Date: {event.date}</p>
-                <Link
-                  href={`/events/${event.id}`}
-                  className="text-base text-blue-500"
-                >
-                  Read More About This Event!
-                </Link>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );

@@ -278,10 +278,13 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Only select unfinished events
       const eventsData = await ctx.db
-        .select()
+        .select({
+          event: events,
+          creator: users,
+        })
         .from(events)
+        .leftJoin(users, eq(events.creatorId, users.id))
         .where(eq(events.isFinished, false));
 
       const calculateDistance = (
@@ -304,11 +307,20 @@ export const postRouter = createTRPCRouter({
         return R * c;
       };
       const sortedEvents = eventsData
-        .map((dbEvent: DBEvent): Event => {
+        .map((row) => {
+          const dbEvent = row.event;
+          const creator = row.creator;
           return {
             id: dbEvent.id,
             name: dbEvent.title,
             creatorId: dbEvent.creatorId,
+            creator: creator
+              ? {
+                  id: creator.id,
+                  name: creator.name,
+                  image: creator.image,
+                }
+              : null,
             type: dbEvent.type,
             description: dbEvent.description,
             date: dbEvent.date
@@ -358,16 +370,29 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const eventsData = await ctx.db
-        .select()
+        .select({
+          event: events,
+          creator: users,
+        })
         .from(events)
+        .leftJoin(users, eq(events.creatorId, users.id))
         .where(eq(events.isFinished, false));
 
       return eventsData
-        .map((dbEvent: DBEvent): Event => {
+        .map((row) => {
+          const dbEvent = row.event;
+          const creator = row.creator;
           return {
             id: dbEvent.id,
             name: dbEvent.title,
             creatorId: dbEvent.creatorId,
+            creator: creator
+              ? {
+                  id: creator.id,
+                  name: creator.name,
+                  image: creator.image,
+                }
+              : null,
             type: dbEvent.type,
             description: dbEvent.description,
             date: dbEvent.date
@@ -405,16 +430,29 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const eventsData = await ctx.db
-        .select()
+        .select({
+          event: events,
+          creator: users,
+        })
         .from(events)
+        .leftJoin(users, eq(events.creatorId, users.id))
         .where(eq(events.isFinished, false));
 
       return eventsData
-        .map((dbEvent: DBEvent): Event => {
+        .map((row) => {
+          const dbEvent = row.event;
+          const creator = row.creator;
           return {
             id: dbEvent.id,
             name: dbEvent.title,
             creatorId: dbEvent.creatorId,
+            creator: creator
+              ? {
+                  id: creator.id,
+                  name: creator.name,
+                  image: creator.image,
+                }
+              : null,
             type: dbEvent.type,
             description: dbEvent.description,
             date: dbEvent.date
@@ -452,16 +490,29 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const eventsData = await ctx.db
-        .select()
+        .select({
+          event: events,
+          creator: users,
+        })
         .from(events)
+        .leftJoin(users, eq(events.creatorId, users.id))
         .where(eq(events.isFinished, false));
 
       return eventsData
-        .map((dbEvent: DBEvent): Event => {
+        .map((row) => {
+          const dbEvent = row.event;
+          const creator = row.creator;
           return {
             id: dbEvent.id,
             name: dbEvent.title,
             creatorId: dbEvent.creatorId,
+            creator: creator
+              ? {
+                  id: creator.id,
+                  name: creator.name,
+                  image: creator.image,
+                }
+              : null,
             type: dbEvent.type,
             description: dbEvent.description,
             date: dbEvent.date
@@ -498,18 +549,31 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const eventsData = await ctx.db
-        .select()
+        .select({
+          event: events,
+          creator: users,
+        })
         .from(events)
+        .leftJoin(users, eq(events.creatorId, users.id))
         .where(
           sql`LOWER(${events.title}) LIKE LOWER(${"%" + input.searchTerm + "%"})`,
         );
 
       return eventsData
-        .map(
-          (dbEvent: DBEvent): Event => ({
+        .map((row) => {
+          const dbEvent = row.event;
+          const creator = row.creator;
+          return {
             id: dbEvent.id,
             name: dbEvent.title,
             creatorId: dbEvent.creatorId,
+            creator: creator
+              ? {
+                  id: creator.id,
+                  name: creator.name,
+                  image: creator.image,
+                }
+              : null,
             type: dbEvent.type,
             description: dbEvent.description,
             date: dbEvent.date
@@ -531,8 +595,8 @@ export const postRouter = createTRPCRouter({
             maxParticipants: dbEvent.maxParticipants ?? 10,
             participantsCount: (dbEvent.participantIds as string[]).length,
             participantIds: dbEvent.participantIds as string[],
-          }),
-        )
+          };
+        })
         .slice(input.offset, input.offset + input.limit);
     }),
 
@@ -808,11 +872,11 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ userIds: z.array(z.string()) }))
     .query(async ({ ctx, input }) => {
       if (input.userIds.length === 0) return [];
-      
+
       const users = await ctx.db.query.users.findMany({
         where: (users, { inArray }) => inArray(users.id, input.userIds),
       });
-      
+
       return users;
     }),
 });

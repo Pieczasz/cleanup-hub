@@ -62,7 +62,7 @@ const Footer = () => {
                 </h5>
                 <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-green-800 transition-all duration-500 group-hover:scale-x-100" />
               </Link>
-              <Link href="/" className="group relative">
+              <Link href="/events" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Host an Event
                 </h5>
