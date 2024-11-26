@@ -1,5 +1,6 @@
 "use client";
 
+// Components
 import {
   Dialog,
   DialogContent,
@@ -8,10 +9,14 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { Checkbox } from "./ui/checkbox";
-import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
+
+// Icons
+import { StarIcon } from "@heroicons/react/24/solid";
+
+// Functions
+import { useState, useEffect } from "react";
 
 interface Participant {
   id: string;
@@ -50,7 +55,9 @@ export const AttendanceDialog = ({
     Map<string, { attended: boolean; rating: number }>
   >(new Map(participants.map((p) => [p.id, { attended: false, rating: 0 }])));
 
-  const [hoverRatings, setHoverRatings] = useState<Map<string, number>>(new Map());
+  const [hoverRatings, setHoverRatings] = useState<Map<string, number>>(
+    new Map(),
+  );
 
   // Reset attendance when dialog opens with new participants
   useEffect(() => {
@@ -179,7 +186,9 @@ export const AttendanceDialog = ({
                       <StarIcon
                         key={star}
                         className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
-                          (hoverRatings.get(participant.id) ?? attendanceState.get(participant.id)?.rating ?? 0) >= star
+                          (hoverRatings.get(participant.id) ??
+                            attendanceState.get(participant.id)?.rating ??
+                            0) >= star
                             ? "text-yellow-400"
                             : "text-gray-300"
                         } ${isSubmitting ? "opacity-50" : "hover:text-yellow-400"}`}
@@ -187,8 +196,12 @@ export const AttendanceDialog = ({
                           !isSubmitting &&
                           handleRatingChange(participant.id, star)
                         }
-                        onMouseEnter={() => !isSubmitting && handleStarHover(participant.id, star)}
-                        onMouseLeave={() => !isSubmitting && handleStarLeave(participant.id)}
+                        onMouseEnter={() =>
+                          !isSubmitting && handleStarHover(participant.id, star)
+                        }
+                        onMouseLeave={() =>
+                          !isSubmitting && handleStarLeave(participant.id)
+                        }
                       />
                     ))}
                   </div>

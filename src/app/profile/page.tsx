@@ -15,16 +15,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+
+import { UserEvents } from "@/components/UserEvents";
+import { ParticipatingInEvents } from "@/components/ParticipatingInEvents";
+import { PastUserEvents } from "@/components/PastUserEvents";
+
+// Icons
 import { StarIcon } from "@heroicons/react/24/solid";
+
+// tRPC
 import { api } from "@/trpc/react";
 
 // Functions
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UserEvents } from "@/components/UserEvents";
-import { ParticipatingInEvents } from "@/components/ParticipatingInEvents";
-import { PastUserEvents } from "@/components/PastUserEvents";
 
 const RatingDisplay = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-2">

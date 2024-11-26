@@ -4,7 +4,7 @@
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Image from "next/image"; // Add this import
+import Image from "next/image";
 
 // Framer motion
 import { motion } from "framer-motion";

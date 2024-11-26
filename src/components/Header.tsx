@@ -2,8 +2,8 @@
 
 // Functions
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react"; // Add this import
-import Image from "next/image"; // Add this import
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 // Components
 import Nav from "@/components/Nav";

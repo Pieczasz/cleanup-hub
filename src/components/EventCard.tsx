@@ -1,11 +1,16 @@
-import { type Event } from "@/server/db/schema";
-import { eventTypeColors, type EventType } from "@/lib/constants";
+// Components
 import Link from "next/link";
+
+// Icons
 import {
   CalendarIcon,
   MapPinIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+
+// Types and constants
+import { type Event } from "@/server/db/schema";
+import { eventTypeColors, type EventType } from "@/lib/constants";
 
 export function EventCard({ event }: { event: Event }) {
   return (

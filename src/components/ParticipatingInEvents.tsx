@@ -1,5 +1,8 @@
-import { api } from "@/trpc/react";
+// Components
 import { EventCard } from "./EventCard";
+
+// tRPC
+import { api } from "@/trpc/react";
 
 const EventCardSkeleton = () => (
   <div className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">

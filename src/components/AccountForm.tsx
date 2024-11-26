@@ -1,11 +1,12 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import Image from "next/image";
+// Components
 import { Button } from "./ui/button";
 import EditProfileForm from "./EditProfileForm";
 
-import { useState, useEffect } from "react";
+// Functions
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import type { Session } from "next-auth";
 
 interface ProfileProps {
@@ -16,15 +17,6 @@ export default function Profile({ session: initialSession }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: session, update: updateSession } = useSession();
   const user = session?.user ?? initialSession?.user;
-
-  const [forceUpdate, setForceUpdate] = useState(0);
-
-  // Force refresh when session changes
-  useEffect(() => {
-    if (session) {
-      setForceUpdate((prev) => prev + 1);
-    }
-  }, [session]);
 
   if (!user) {
     return (

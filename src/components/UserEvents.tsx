@@ -1,6 +1,10 @@
 "use client";
+
+// Components
 import { EventCard } from "./EventCard";
 import Link from "next/link";
+
+// tRPC
 import { api } from "@/trpc/react";
 
 const EventCardSkeleton = () => (
