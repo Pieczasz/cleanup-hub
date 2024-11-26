@@ -54,8 +54,10 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
   const [groupBy, setGroupBy] = useState<
     "Closest" | "Newest" | "Upcoming" | "MostPopular"
   >("Upcoming");
+  const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
 
   // TRPC queries for different grouping options
+  // TODO: Optimize by using a single query with different parameters
   const closestEventsQuery = api.post.getClosestEvents.useQuery(
     {
       lat: userLocation?.lat ?? 0,
@@ -287,6 +289,18 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           </ul>
         )}
       </div>
+      {events.length >= itemsPerPage && (
+        <div className="mt-4 flex w-full items-center justify-center">
+          <Button
+            onClick={() => {
+              setItemsPerPage(itemsPerPage + 20);
+            }}
+            className="w-1/2 rounded-3xl py-6 text-lg text-white lg:w-1/4"
+          >
+            Search for More Events
+          </Button>
+        </div>
+      )}
     </div>
   );
 });
