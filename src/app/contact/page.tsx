@@ -7,7 +7,7 @@ import ContactForm from "@/components/ContactForm";
 const Contact = () => {
   return (
     <PageLayout>
-      <div className="flex w-full flex-col items-center justify-center gap-y-32">
+      <div className="mt-16 flex w-full flex-col items-center justify-center gap-y-32">
         <ContactForm />
       </div>
     </PageLayout>
