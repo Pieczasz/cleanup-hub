@@ -11,6 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { CreateEventForm } from "./CreateEventForm";
+
 // Functions
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -20,16 +29,9 @@ import { useRouter } from "next/navigation";
 // Hooks
 import { toast } from "@/hooks/use-toast";
 import { useDebounce } from "use-debounce";
+
 // Types
 import type { Event } from "@/server/db/schema";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { CreateEventForm } from "./CreateEventForm";
 
 export interface SearchForEventsRef {
   openHostEventDialog: () => void;
@@ -55,6 +57,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
     "Closest" | "Newest" | "Upcoming" | "MostPopular"
   >("Upcoming");
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
+  const [isLocationAvailable, setIsLocationAvailable] = useState(true);
 
   // TRPC queries for different grouping options
   // TODO: Optimize by using a single query with different parameters
@@ -113,6 +116,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           title: "Error",
           description: "Geolocation is not supported by your browser.",
         });
+        setIsLocationAvailable(false);
         return;
       }
 
@@ -135,6 +139,7 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
           title: "Error",
           description: "Unable to retrieve your location.",
         });
+        setIsLocationAvailable(false);
         console.error(error);
       }
     };
@@ -153,6 +158,22 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
       router.push("/signIn");
     }
   }, [isDialogOpen, session, router]);
+
+  useEffect(() => {
+    const handleOpenHostEventDialog = () => setDialogOpen(true);
+
+    window.addEventListener(
+      "open-host-event-dialog",
+      handleOpenHostEventDialog,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "open-host-event-dialog",
+        handleOpenHostEventDialog,
+      );
+    };
+  }, []);
 
   // Update events based on the selected grouping option and search term
   useEffect(() => {
@@ -217,7 +238,9 @@ const SearchForEvents = forwardRef<SearchForEventsRef>((_, ref) => {
               <SelectLabel>Group By</SelectLabel>
               <SelectItem value="Upcoming">Upcoming Events</SelectItem>
               <SelectItem value="Newest">Newest Events</SelectItem>
-              <SelectItem value="Closest">Closest Events</SelectItem>
+              <SelectItem value="Closest" disabled={!isLocationAvailable}>
+                Closest Events
+              </SelectItem>
               <SelectItem value="MostPopular">Most Popular Events</SelectItem>
             </SelectGroup>
           </SelectContent>

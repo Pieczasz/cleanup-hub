@@ -1,9 +1,20 @@
+"use client";
+
 // Components
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Link from "next/link";
 import Socials from "./Socials";
 
+// Functions
+import { useRouter } from "next/navigation";
+
 const Footer = () => {
+  const router = useRouter();
+
+  const handleHostEvent = () => {
+    router.push("/events");
+  };
+
   return (
     <footer className="bg-[#6AA553] pt-16 text-white">
       <MaxWidthWrapper>
@@ -62,7 +73,11 @@ const Footer = () => {
                 </h5>
                 <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-green-800 transition-all duration-500 group-hover:scale-x-100" />
               </Link>
-              <Link href="/events" className="group relative">
+              <Link
+                href="#"
+                onClick={handleHostEvent}
+                className="group relative"
+              >
                 <h5 className="text-white transition-all duration-300">
                   Host an Event
                 </h5>
