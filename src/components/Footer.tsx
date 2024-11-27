@@ -36,19 +36,19 @@ const Footer = () => {
               </Link>
             </div>
             <div className="flex flex-col items-center justify-center space-y-6">
-              <Link href="/" className="group relative">
+              <Link href="/privacy-policy" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Privacy Policy
                 </h5>
                 <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-green-800 transition-all duration-500 group-hover:scale-x-100" />
               </Link>
-              <Link href="/" className="group relative">
+              <Link href="/terms-of-service" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Terms of Service
                 </h5>
                 <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-green-800 transition-all duration-500 group-hover:scale-x-100" />
               </Link>
-              <Link href="/" className="group relative">
+              <Link href="/cookie-policy" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Cookie Policy
                 </h5>
@@ -68,7 +68,7 @@ const Footer = () => {
                 </h5>
                 <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-green-800 transition-all duration-500 group-hover:scale-x-100" />
               </Link>
-              <Link href="/" className="group relative">
+              <Link href="/donate-supplies" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   Donate Supplies
                 </h5>

@@ -10,7 +10,7 @@ const About = () => {
         <div className="mb-16 flex flex-col gap-y-24">
           <div className="mt-16 flex w-full flex-col items-center justify-between gap-8 lg:flex-row">
             <div className="flex flex-col items-start justify-start gap-y-8 text-left">
-              <h1 className="text-4xl font-bold">About Cleanup Hub</h1>
+              <h2 className="text-4xl font-bold">About Cleanup Hub</h2>
               <p className="max-w-2xl text-lg">
                 <span className="font-semibold">Welcome to Cleanup Hub!</span>{" "}
                 We are dedicated to making the world a cleaner and greener
@@ -54,7 +54,7 @@ const About = () => {
               className="hidden rounded-[100px] lg:block"
             />
             <div className="flex flex-col items-start justify-start gap-y-8 text-left">
-              <h1 className="text-4xl font-bold">About The Creator</h1>
+              <h2 className="text-4xl font-bold">About The Creator</h2>
               <p className="max-w-2xl text-lg">
                 <span className="font-semibold">Hi there!</span> My name is
                 Bartłomiej Piekarz, and I am the founder of CleanupHub. I am

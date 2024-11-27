@@ -108,7 +108,7 @@ const HowYouCanGetInvolved = () => {
               <Button
                 className="max-w-[12rem] rounded-3xl py-6 text-lg text-white"
                 onClick={() => {
-                  router.push("/events");
+                  router.push("/donate-supplies");
                 }}
               >
                 Donate Supplies
