@@ -16,7 +16,7 @@ const Footer = () => {
               </h3>
             </div>
             <div className="flex flex-col items-center justify-center space-y-6">
-              <Link href="/" className="group relative">
+              <Link href="/about" className="group relative">
                 <h5 className="text-white transition-all duration-300">
                   About Us
                 </h5>

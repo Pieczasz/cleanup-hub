@@ -1,11 +1,14 @@
-import PageLayout from "@/components/PageLayout";
+"use client";
+
 import React from "react";
+import PageLayout from "@/components/PageLayout";
+import ContactForm from "@/components/ContactForm";
 
 const Contact = () => {
   return (
     <PageLayout>
       <div className="flex w-full flex-col items-center justify-center gap-y-32">
-        Contact
+        <ContactForm />
       </div>
     </PageLayout>
   );
