@@ -92,7 +92,8 @@ export const authConfig: NextAuthConfig = {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
   adapter: DrizzleAdapter(db),
   callbacks: {
     async jwt({
