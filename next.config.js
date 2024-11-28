@@ -10,7 +10,7 @@ const config = {
     domains: ["lh3.googleusercontent.com", "syiblhavitrbblqvhige.supabase.co"],
   },
   env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? "http://localhost:3000",
   },
 };
 

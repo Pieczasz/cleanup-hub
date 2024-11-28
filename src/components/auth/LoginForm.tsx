@@ -2,8 +2,7 @@
 
 // Functions
 import { useEffect, useState } from "react";
-
-import { getProviders, getCsrfToken } from "next-auth/react";
+import { getCsrfToken } from "next-auth/react";
 
 // Components
 import { CardWrapper } from "@/components/auth/CardWrapper";
@@ -18,12 +17,12 @@ const LoginForm = () => {
   const [success, setSuccess] = useState<string | undefined>("");
 
   useEffect(() => {
-    async function loadProviders() {
+    async function loadCsrfToken() {
       const csrf = await getCsrfToken();
       setCsrfToken(csrf);
     }
-    loadProviders().catch((error) => {
-      console.error("Failed to load providers:", error);
+    loadCsrfToken().catch((error) => {
+      console.error("Failed to load CSRF token:", error);
     });
   }, []);
 
