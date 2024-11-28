@@ -49,7 +49,7 @@ export const authConfig: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const csrfToken = await getCsrfToken({ req });
+        const csrfToken = await getCsrfToken();
         if (!credentials?.email || !credentials?.password || !csrfToken) {
           return null;
         }
