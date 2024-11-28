@@ -13,13 +13,12 @@ import FormSuccess from "@/components/FormSuccess";
 
 const LoginForm = () => {
   const [csrfToken, setCsrfToken] = useState("");
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
+  const [error] = useState<string | undefined>("");
+  const [success] = useState<string | undefined>("");
 
   useEffect(() => {
     async function loadCsrfToken() {
       const csrf = await getCsrfToken();
-      console.log("CSRF Token:", csrfToken);
       if (csrf) {
         setCsrfToken(csrf);
       }

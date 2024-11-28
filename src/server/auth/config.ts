@@ -14,7 +14,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/server/db";
 
 // Typography
-import bcrypt, { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 // Providers
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -139,9 +139,3 @@ export const authConfig: NextAuthConfig = {
     },
   },
 };
-
-// Helper function to hash passwords
-export async function hashPassword(password: string): Promise<string> {
-  const hashedPassword = hash(password, 10);
-  return hashedPassword;
-}
