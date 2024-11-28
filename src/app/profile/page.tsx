@@ -96,8 +96,8 @@ export default function Account() {
   return (
     <PageLayout>
       <MaxWidthWrapper>
-        <div className="w-full">
-          <div className="mb-8 flex flex-col items-center justify-between sm:flex-row">
+        <div className="w-full space-y-6">
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col items-center gap-4 sm:flex-row">
               <Image
                 src={session?.user.image ?? "/defaultAvatar.jpg"}
@@ -106,7 +106,7 @@ export default function Account() {
                 height={100}
                 className="rounded-full"
               />
-              <div className="text-center sm:text-left">
+              <div>
                 <h1 className="text-3xl font-bold">{session?.user.name}</h1>
                 {userRating && (
                   <div className="mt-2">
@@ -118,11 +118,12 @@ export default function Account() {
                 )}
               </div>
             </div>
+
             {session && (
               <Button
                 variant="destructive"
                 onClick={() => setShowSignOutDialog(true)}
-                className="mt-4 sm:mt-0 sm:ml-auto"
+                className="mx-auto w-full max-w-28 sm:ml-auto sm:mr-0 sm:w-auto"
               >
                 Sign Out
               </Button>
@@ -154,19 +155,13 @@ export default function Account() {
             </Dialog>
           </div>
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-4 flex flex-col gap-2 sm:flex-row">
-              <TabsTrigger value="profile" className="w-full sm:w-auto">
-                Profile Settings
-              </TabsTrigger>
-              <TabsTrigger value="events" className="w-full sm:w-auto">
-                My Events
-              </TabsTrigger>
-              <TabsTrigger value="participating" className="w-full sm:w-auto">
+            <TabsList className="grid w-full grid-cols-1 gap-2 sm:flex sm:gap-0">
+              <TabsTrigger value="profile">Profile Settings</TabsTrigger>
+              <TabsTrigger value="events">My Events</TabsTrigger>
+              <TabsTrigger value="participating">
                 Participating in Events
               </TabsTrigger>
-              <TabsTrigger value="past" className="w-full sm:w-auto">
-                Past Events
-              </TabsTrigger>
+              <TabsTrigger value="past">Past Events</TabsTrigger>
             </TabsList>
             <TabsContent value="profile">
               <AccountForm session={session} />
