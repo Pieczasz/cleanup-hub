@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import type { Session } from "next-auth";
 
+// Interfaces
 interface ProfileProps {
   session: Session | null;
 }

@@ -1,12 +1,17 @@
+// tailwind Styles
 import "@/styles/globals.css";
 
+// Fonts
 import { Lexend } from "next/font/google";
+
+// Metadata
 import { type Metadata } from "next";
 
+// tRPC Provider
 import { TRPCReactProvider } from "@/trpc/react";
-import { Toaster } from "@/components/ui/toaster";  // Update this import
 
 // Components
+import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import Provider from "@/components/Provider";
 

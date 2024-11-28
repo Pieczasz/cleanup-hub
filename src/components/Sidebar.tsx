@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Socials from "./Socials";
 
+// Interfaces
 interface SidebarLink {
   path: string;
   name: string;
@@ -97,7 +98,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </Link>
         ))}
         {isClient && session ? (
-          <Link href="/profile" className="flex items-center gap-x-2" onClick={onLinkClick}>
+          <Link
+            href="/profile"
+            className="flex items-center gap-x-2"
+            onClick={onLinkClick}
+          >
             <div className="h-8 w-8 overflow-hidden rounded-full">
               <Image
                 src={session.user.image ?? "/defaultAvatar.png"}

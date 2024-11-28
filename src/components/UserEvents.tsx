@@ -36,7 +36,7 @@ const EventCardSkeleton = () => (
     </div>
   </div>
 );
-
+// Interfaces
 interface UserEventsProps {
   userId?: string;
 }

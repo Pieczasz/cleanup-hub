@@ -19,6 +19,7 @@ const customIcon = L.icon({
   popupAnchor: [5, -25],
 });
 
+// Types
 type Coordinates = {
   lat: number;
   lng: number;
@@ -90,11 +91,11 @@ const OpenStreetMap: React.FC = () => {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   const { data: events } = api.post.getEventsFromMostPopular.useQuery();
-  
+
   // Replace the single creator query with a query for all creators
   const { data: usersData } = api.post.getUsersByIds.useQuery(
     { userIds: events?.map((event) => event.creatorId) ?? [] },
-    { enabled: !!events }
+    { enabled: !!events },
   );
 
   // Handle map cleanup
@@ -131,8 +132,10 @@ const OpenStreetMap: React.FC = () => {
 
         {events?.map((event) => {
           // Find the creator for this event
-          const creator = usersData?.find(user => user.id === event.creatorId);
-          
+          const creator = usersData?.find(
+            (user) => user.id === event.creatorId,
+          );
+
           return (
             <Marker
               key={event.id}
@@ -165,7 +168,8 @@ const OpenStreetMap: React.FC = () => {
                     Type:{" "}
                     {event.type === "treePlanting"
                       ? "Tree Planting"
-                      : event.type[0]?.toLocaleUpperCase() + event.type.slice(1)}
+                      : event.type[0]?.toLocaleUpperCase() +
+                        event.type.slice(1)}
                   </p>
                   <p>Date: {event.date}</p>
                   <Link

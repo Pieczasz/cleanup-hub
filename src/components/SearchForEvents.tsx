@@ -33,6 +33,7 @@ import { useDebounce } from "use-debounce";
 // Types
 import type { Event } from "@/server/db/schema";
 
+// Interfaces
 export interface SearchForEventsRef {
   openHostEventDialog: () => void;
 }

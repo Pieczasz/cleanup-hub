@@ -4,13 +4,13 @@
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 
 // Framer motion
 import { motion } from "framer-motion";
 
 // Components
 import Link from "next/link";
+import Image from "next/image";
 
 interface NavLink {
   path: string;

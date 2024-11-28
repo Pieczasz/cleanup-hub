@@ -18,6 +18,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 // Functions
 import { useState, useEffect } from "react";
 
+// Interfaces
 interface Participant {
   id: string;
   name: string | null;

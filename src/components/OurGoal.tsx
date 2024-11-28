@@ -1,3 +1,4 @@
+// Components
 import Image from "next/image";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 

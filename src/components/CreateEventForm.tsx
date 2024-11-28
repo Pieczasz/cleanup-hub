@@ -48,6 +48,7 @@ import { Loader2, Check } from "lucide-react";
 
 // Type definitions for Nominatim API responses
 
+// Interfaces
 interface NominatimSearchResult {
   lat: string;
   lon: string;

@@ -19,6 +19,7 @@ import { useDebounce } from "use-debounce";
 // Types
 import type { Map as LeafletMap } from "leaflet";
 
+// Interfaces
 interface Coordinates {
   lat: number;
   lng: number;
@@ -41,7 +42,6 @@ interface NominatimReverseResult {
   };
 }
 
-// Update the interface to include address
 interface MapSelectionProps {
   onLocationSelect: (
     coordinates: Coordinates & { name?: string; address?: string },
@@ -94,7 +94,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   const defaultCenter: Coordinates = { lat: 52.237049, lng: 19.017532 };
   const [center, setCenter] = useState(defaultCenter);
 
-  // Separate useEffect for initial location request
   useEffect(() => {
     const getUserLocation = async () => {
       try {
@@ -137,13 +136,11 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     void getUserLocation();
   }, []);
 
-  // New useEffect to handle map updates when user location changes
   useEffect(() => {
     if (userLocation) {
       setCenter(userLocation);
       setZoom(10);
 
-      // If the map reference exists, we can also programmatically update it
       if (mapRef.current) {
         mapRef.current.setView([userLocation.lat, userLocation.lng], 12);
       }
@@ -169,7 +166,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
   };
 
-  // Update handleSave to include both name and address
   const handleSave = () => {
     if (position) {
       const locationToSave = {
@@ -208,14 +204,12 @@ const MapSelection: React.FC<MapSelectionProps> = ({
     }
   };
 
-  // Update handleSelectAddress to keep both values
   const handleSelectAddress = (suggestion: NominatimSearchResult) => {
     const newPosition = {
       lat: parseFloat(suggestion.lat),
       lng: parseFloat(suggestion.lon),
     };
     setPosition(newPosition);
-    // Fix the TypeScript error by ensuring we always pass a string
     setAddress(suggestion.display_name || "");
     if (!locationName) {
       setLocationName(

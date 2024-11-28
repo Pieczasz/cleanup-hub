@@ -9,9 +9,11 @@ import { Label } from "./ui/label";
 // Functions
 import { useState } from "react";
 import type { Session } from "next-auth";
-import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+
+// tRPC
+import { api } from "@/trpc/react";
 
 // Hooks
 import { useToast } from "@/hooks/use-toast";

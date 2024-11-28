@@ -10,9 +10,11 @@ import {
 import { Button } from "./ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 
+// tRPC
+import { api } from "@/trpc/react";
+
 // Functions
 import { useRouter } from "next/navigation";
-import { api } from "@/trpc/react";
 import { format } from "date-fns";
 
 const LoadingSkeleton = () => (

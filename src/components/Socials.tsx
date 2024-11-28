@@ -13,6 +13,7 @@ import Link from "next/link";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
+// Interfaces
 interface SocialsLink {
   path: string;
   icon: JSX.Element;

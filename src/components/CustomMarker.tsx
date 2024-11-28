@@ -1,7 +1,9 @@
+// Leaflet
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Marker } from "react-leaflet";
 
+// Interfaces
 interface CustomMarkerProps {
   position: L.LatLngExpression;
   children: React.ReactNode;
