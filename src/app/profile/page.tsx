@@ -97,8 +97,8 @@ export default function Account() {
     <PageLayout>
       <MaxWidthWrapper>
         <div className="w-full">
-          <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="mb-8 flex flex-col items-center justify-between sm:flex-row">
+            <div className="flex flex-col items-center gap-4 sm:flex-row">
               <Image
                 src={session?.user.image ?? "/defaultAvatar.jpg"}
                 alt="Profile picture"
@@ -106,7 +106,7 @@ export default function Account() {
                 height={100}
                 className="rounded-full"
               />
-              <div>
+              <div className="text-center sm:text-left">
                 <h1 className="text-3xl font-bold">{session?.user.name}</h1>
                 {userRating && (
                   <div className="mt-2">
@@ -122,7 +122,7 @@ export default function Account() {
               <Button
                 variant="destructive"
                 onClick={() => setShowSignOutDialog(true)}
-                className="ml-auto"
+                className="mt-4 sm:mt-0 sm:ml-auto"
               >
                 Sign Out
               </Button>
@@ -154,17 +154,17 @@ export default function Account() {
             </Dialog>
           </div>
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-4 flex w-full flex-col gap-2 sm:flex-row">
-              <TabsTrigger value="profile" className="w-full">
+            <TabsList className="mb-4 flex flex-col gap-2 sm:flex-row">
+              <TabsTrigger value="profile" className="w-full sm:w-auto">
                 Profile Settings
               </TabsTrigger>
-              <TabsTrigger value="events" className="w-full">
+              <TabsTrigger value="events" className="w-full sm:w-auto">
                 My Events
               </TabsTrigger>
-              <TabsTrigger value="participating" className="w-full">
+              <TabsTrigger value="participating" className="w-full sm:w-auto">
                 Participating in Events
               </TabsTrigger>
-              <TabsTrigger value="past" className="w-full">
+              <TabsTrigger value="past" className="w-full sm:w-auto">
                 Past Events
               </TabsTrigger>
             </TabsList>

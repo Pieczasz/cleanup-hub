@@ -93,8 +93,8 @@ export default function PublicProfile({ params }: ProfilePageProps) {
       <MaxWidthWrapper>
         <div className="w-full py-12">
           <div className="rounded-lg bg-white px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-center justify-between">
-              <div className="flex items-center justify-between gap-4">
+            <div className="mb-8 flex flex-col items-center justify-between sm:flex-row">
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
                 <Image
                   src={user?.image ?? "/defaultAvatar.jpg"}
                   alt="Profile picture"
@@ -102,16 +102,14 @@ export default function PublicProfile({ params }: ProfilePageProps) {
                   height={100}
                   className="rounded-full"
                 />
-                <div>
-                  <div>
-                    <h1 className="text-3xl font-bold">{user?.name}</h1>
-                    <p className="text-gray-600">
-                      Member since{" "}
-                      {new Date(
-                        user?.createdAt ?? Date.now(),
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-3xl font-bold">{user?.name}</h1>
+                  <p className="text-gray-600">
+                    Member since{" "}
+                    {new Date(
+                      user?.createdAt ?? Date.now(),
+                    ).toLocaleDateString()}
+                  </p>
                   {userRating && (
                     <div className="mt-2">
                       <RatingDisplay rating={userRating.average} />
@@ -125,12 +123,19 @@ export default function PublicProfile({ params }: ProfilePageProps) {
             </div>
 
             <Tabs defaultValue="events" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="events">User Events</TabsTrigger>
-                <TabsTrigger value="participating">
+              <TabsList className="mb-4 flex flex-col gap-2 sm:flex-row">
+                <TabsTrigger value="events" className="w-full sm:w-auto">
+                  User Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="participating"
+                  className="w-full sm:w-auto"
+                >
                   Participating in Events
                 </TabsTrigger>
-                <TabsTrigger value="past">Past Events</TabsTrigger>
+                <TabsTrigger value="past" className="w-full sm:w-auto">
+                  Past Events
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="events">
                 <UserEvents userId={user?.id} />
