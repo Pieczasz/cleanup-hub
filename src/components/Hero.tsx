@@ -32,7 +32,6 @@ const Hero = () => {
             Join a Clean-Up
           </Button>
         </div>
-        {/* //TODO: Maybe make something with image on mobile */}
         <Image
           src="/CleanupHubLogo.png"
           alt="Hero section image"
