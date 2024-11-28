@@ -109,7 +109,10 @@ const MostPopularEvents = () => {
               <CardContent className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center">
                   <Avatar className="mr-3 h-12 w-12">
-                    <AvatarImage src={creator?.image ?? ""} />
+                    <AvatarImage
+                      src={creator?.image ?? ""}
+                      alt="Avatar of the event creator"
+                    />
                     <AvatarFallback>{creator?.name?.[0] ?? "O"}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">

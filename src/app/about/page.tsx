@@ -50,7 +50,7 @@ const About = () => {
               src={"/imageOfMe.jpg"}
               width={500}
               height={750}
-              alt="Minimalistic illustration representing Earth-themed elements"
+              alt="Illustration of the creator of CleanupHub"
               className="hidden rounded-[100px] lg:block"
             />
             <div className="flex flex-col items-start justify-start gap-y-8 text-left">
@@ -85,7 +85,7 @@ const About = () => {
               src={"/imageOfMe.jpg"}
               width={500}
               height={750}
-              alt="Minimalistic illustration representing Earth-themed elements"
+              alt="Illustration of the creator of CleanupHub"
               className="block rounded-[100px] lg:hidden"
             />
           </div>
