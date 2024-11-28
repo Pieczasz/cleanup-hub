@@ -127,10 +127,7 @@ export default function PublicProfile({ params }: ProfilePageProps) {
                 <TabsTrigger value="events" className="w-full sm:w-auto">
                   User Events
                 </TabsTrigger>
-                <TabsTrigger
-                  value="participating"
-                  className="w-full sm:w-auto"
-                >
+                <TabsTrigger value="participating" className="w-full sm:w-auto">
                   Participating in Events
                 </TabsTrigger>
                 <TabsTrigger value="past" className="w-full sm:w-auto">
