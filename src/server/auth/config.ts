@@ -97,6 +97,7 @@ export const authConfig: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: true,
   adapter: DrizzleAdapter(db),
+  trustHost: true,
   callbacks: {
     async jwt({
       token,

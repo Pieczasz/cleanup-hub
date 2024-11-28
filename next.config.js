@@ -9,6 +9,9 @@ const config = {
   images: {
     domains: ["lh3.googleusercontent.com", "syiblhavitrbblqvhige.supabase.co"],
   },
+  env: {
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  },
 };
 
 export default config;
