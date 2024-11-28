@@ -8,6 +8,7 @@ import type {
 } from "next-auth";
 import { env } from "@/env";
 import type { JWT } from "next-auth/jwt";
+import { getCsrfToken } from "next-auth/react";
 
 // Database
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -47,8 +48,9 @@ export const authConfig: NextAuthConfig = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+      async authorize(credentials, _req) {
+        const csrfToken = await getCsrfToken();
+        if (!credentials?.email || !credentials?.password || !csrfToken) {
           return null;
         }
 
