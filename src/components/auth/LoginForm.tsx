@@ -19,7 +19,10 @@ const LoginForm = () => {
   useEffect(() => {
     async function loadCsrfToken() {
       const csrf = await getCsrfToken();
-      setCsrfToken(csrf);
+      console.log("CSRF Token:", csrfToken);
+      if (csrf) {
+        setCsrfToken(csrf);
+      }
     }
     loadCsrfToken().catch((error) => {
       console.error("Failed to load CSRF token:", error);
