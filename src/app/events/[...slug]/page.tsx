@@ -279,6 +279,11 @@ const EventPage = ({ params }: PostPageProps) => {
     }
   };
 
+  // Add this near other button click handlers
+  const handleDonateClick = () => {
+    router.push(`/events/donate/${event?.id}`);
+  };
+
   // Update the condition for showing the finish button
   const showFinishButton =
     isEventOngoing &&
@@ -497,17 +502,27 @@ const EventPage = ({ params }: PostPageProps) => {
                             </Button>
                           </>
                         ) : (
-                          <Button
-                            onClick={handleEventParticipation}
-                            className={`w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg ${
-                              isParticipant
-                                ? "bg-red-600 hover:bg-red-600/90"
-                                : "bg-[#6AA553] hover:bg-[#6AA553]"
-                            }`}
-                            disabled={!session || isActionsDisabled(event)}
-                          >
-                            {isParticipant ? "Leave Event" : "Join Event"}
-                          </Button>
+                          <>
+                            {/* Add the Donate button - place it before the Join/Leave button */}
+                            <Button
+                              onClick={handleDonateClick}
+                              className="w-full rounded-3xl bg-purple-600 py-4 text-base hover:bg-purple-600/90 sm:w-auto sm:py-5 sm:text-lg"
+                              disabled={isActionsDisabled(event)}
+                            >
+                              Donate
+                            </Button>
+                            <Button
+                              onClick={handleEventParticipation}
+                              className={`w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg ${
+                                isParticipant
+                                  ? "bg-red-600 hover:bg-red-600/90"
+                                  : "bg-[#6AA553] hover:bg-[#6AA553]"
+                              }`}
+                              disabled={!session || isActionsDisabled(event)}
+                            >
+                              {isParticipant ? "Leave Event" : "Join Event"}
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
