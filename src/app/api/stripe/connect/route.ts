@@ -35,12 +35,20 @@ export async function POST() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
+      console.log("Unauthorized attempt to connect Stripe account");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Log user attempting to connect
+    console.log("User attempting to connect Stripe:", {
+      userId: session.user.id,
+      email: session.user.email,
+    });
 
     // Verify Stripe Connect is enabled
     const hasConnect = await verifyStripeConnect();
     if (!hasConnect) {
+      console.log("Stripe Connect not enabled for account");
       return NextResponse.json(
         {
           error:
@@ -57,13 +65,26 @@ export async function POST() {
     });
 
     if (!user) {
+      console.log("User not found in database:", session.user.id);
       return NextResponse.json(
         { error: "User not found in database" },
         { status: 404 },
       );
     }
 
+    if (!user.email) {
+      console.log("User email missing:", session.user.id);
+      return NextResponse.json(
+        { error: "User email is required" },
+        { status: 400 },
+      );
+    }
+
     if (user.stripeAccountId) {
+      console.log("User already has Stripe account:", {
+        userId: user.id,
+        stripeAccountId: user.stripeAccountId,
+      });
       return NextResponse.json(
         { error: "Stripe account already exists" },
         { status: 400 },
@@ -98,15 +119,22 @@ export async function POST() {
       );
     }
   } catch (error) {
+    // Enhanced error logging
     console.error("Error creating connect account:", {
       error,
       message: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
+      type: error instanceof Stripe.errors.StripeError ? error.type : "unknown",
+      code: error instanceof Stripe.errors.StripeError ? error.code : undefined,
     });
 
     if (error instanceof Stripe.errors.StripeError) {
       return NextResponse.json(
-        { error: error.message },
+        {
+          error: error.message,
+          code: error.code,
+          type: error.type,
+        },
         { status: error.statusCode ?? 500 },
       );
     }
