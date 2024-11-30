@@ -648,7 +648,7 @@ export const postRouter = createTRPCRouter({
       );
     }),
 
-  getUserEventHistory: protectedProcedure
+  getUserEventHistory: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const userHistory = await ctx.db
@@ -667,7 +667,7 @@ export const postRouter = createTRPCRouter({
       return userHistory;
     }),
 
-  getEventParticipants: protectedProcedure
+  getEventParticipants: publicProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ ctx, input }) => {
       const event = await ctx.db.query.events.findFirst({
