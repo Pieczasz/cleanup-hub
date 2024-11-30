@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/server/auth";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react"; // Change to react import
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+// Create mutation hook at the top level
+const addStripeAccountIdMutation = api.post.addStripeAccountId.useMutation();
 
 export async function POST() {
   try {
@@ -37,9 +40,8 @@ async function createConnectAccount(userId: string) {
     },
   });
 
-  // Use mutation instead of mutate for server-side calls
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  await api.post.addStripeAccountId.mutation({ accountId: account.id });
+  // Use the mutation
+  addStripeAccountIdMutation.mutate({ accountId: account.id });
 
   return account;
 }
