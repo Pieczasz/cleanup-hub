@@ -1,15 +1,56 @@
-export default function PaymentSuccess({
-  searchParams: { amount },
-}: {
-  searchParams: { amount: string };
-}) {
-  return (
-    <main className="m-10 mx-auto max-w-6xl rounded-md border bg-gradient-to-tr from-blue-500 to-purple-500 p-10 text-center text-white">
-      <div className="mb-10">
-        <h1 className="mb-2 text-4xl font-extrabold">Thank you!</h1>
-        <h2 className="text-2xl">You successfully sent</h2>
+"use client";
 
-        <div className="mt-5 rounded-md bg-white p-2 text-4xl font-bold text-purple-500">
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+export default function PaymentSuccess() {
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
+  const [sessionData, setSessionData] = useState<{
+    amount_total?: number;
+  } | null>(null);
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+
+  useEffect(() => {
+    if (sessionId) {
+      fetch(`/api/checkout_sessions/${sessionId}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setSessionData(data as { amount_total?: number });
+          setStatus("success");
+        })
+        .catch((error) => {
+          console.error("Error fetching session data:", error);
+          setStatus("error");
+        });
+    }
+  }, [sessionId]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (status === "error") {
+    return <div>Error loading payment details</div>;
+  }
+
+  const amount = sessionData?.amount_total
+    ? (sessionData.amount_total / 100).toFixed(2)
+    : "0.00";
+
+  return (
+    <main className="flex h-screen items-center justify-center bg-[#6AA553] text-center text-white">
+      <div className="rounded-md p-10">
+        <h1 className="mb-2 text-4xl font-extrabold">Thank you!</h1>
+        <h2 className="text-2xl">Your donation was successful</h2>
+        <div className="mt-5 rounded-md bg-white p-2 text-4xl font-bold text-[#6AA553]">
           ${amount}
         </div>
       </div>

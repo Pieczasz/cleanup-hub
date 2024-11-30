@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
+import { motion } from "framer-motion";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
   throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
@@ -57,10 +59,8 @@ export default function DonateEventPage({
     if (data) {
       setEvent({
         id: data.id,
-        title: data.name, // assuming the database Event has a 'name' field instead of 'title'
+        title: data.name,
       });
-    } else if (!isLoading && !error) {
-      //   router.push("/404");
     }
   }, [data, isLoading, error, router]);
 
@@ -70,6 +70,9 @@ export default function DonateEventPage({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    if (!event || !eventId) {
+      return;
+    }
     e.preventDefault();
     if (amount >= 1) {
       setShowCheckout(true);
@@ -78,9 +81,11 @@ export default function DonateEventPage({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent" />
-      </div>
+      <MaxWidthWrapper>
+        <div className="flex min-h-[70vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+        </div>
+      </MaxWidthWrapper>
     );
   }
 
@@ -89,49 +94,78 @@ export default function DonateEventPage({
   }
 
   return (
-    <main className="m-10 mx-auto max-w-6xl rounded-md border bg-gradient-to-tr from-blue-500 to-purple-500 p-10 text-center text-white">
-      <div className="mb-10">
-        <h1 className="mb-2 text-4xl font-extrabold">{event.title}</h1>
-        {!showCheckout ? (
-          <form onSubmit={handleSubmit} className="mx-auto max-w-sm space-y-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">$</span>
-              <Input
-                type="number"
-                value={amount}
-                onChange={handleAmountChange}
-                min={1}
-                step={0.01}
-                className="text-black"
-                required
-              />
-            </div>
-            <Button type="submit" disabled={amount < 1} className="w-full">
-              Continue to Payment
-            </Button>
-          </form>
-        ) : (
-          <>
-            <h2 className="mb-4 text-2xl">
-              Donating <span className="font-bold">${amount}</span>
-            </h2>
-            <Elements
-              stripe={stripePromise}
-              options={{
-                mode: "payment",
-                amount: convertToSubcurrency(amount),
-                currency: "usd",
-              }}
+    <MaxWidthWrapper>
+      <motion.main
+        className="my-20 flex min-h-[60vh] flex-col items-center justify-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="w-full max-w-md space-y-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-3xl tracking-tight text-gray-900">
+            How much do you want to donate for{" "}
+            <span className="font-bold">{event.title}</span>?
+          </h2>
+
+          {!showCheckout ? (
+            <motion.form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
             >
-              <CheckoutPage
-                amount={amount}
-                eventId={eventId!}
-                onCancel={() => setShowCheckout(false)}
-              />
-            </Elements>
-          </>
-        )}
-      </div>
-    </main>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl text-gray-700">$</span>
+                <Input
+                  type="number"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  min={1}
+                  step={0.01}
+                  className="text-lg"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={amount < 1}
+                className="w-full text-lg"
+              >
+                Continue to Payment
+              </Button>
+            </motion.form>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  mode: "payment",
+                  amount: convertToSubcurrency(amount),
+                  currency: "usd",
+                }}
+              >
+                <div className="space-y-4">
+                  <CheckoutPage
+                    amount={amount}
+                    eventId={eventId!}
+                    onCancel={() => setShowCheckout(false)}
+                  />
+                </div>
+              </Elements>
+            </motion.div>
+          )}
+        </motion.div>
+      </motion.main>
+    </MaxWidthWrapper>
   );
 }

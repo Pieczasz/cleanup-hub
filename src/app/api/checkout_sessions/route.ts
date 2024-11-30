@@ -8,18 +8,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    type RequestBody = {
-      amount: number;
-      eventId: string;
-      donorId: string;
-    };
+    const formData = await request.formData();
+    const amount = Number(formData.get("amount"));
+    const eventId = formData.get("eventId")?.toString();
 
-    const body = (await request.json()) as RequestBody;
-    const { amount, eventId, donorId }: RequestBody = body;
-
-    // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
@@ -27,7 +20,7 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: "Event Donation",
             },
-            unit_amount: amount,
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },
@@ -35,15 +28,10 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       success_url: `${request.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/events/${eventId}`,
-      metadata: {
-        eventId: eventId ?? null,
-        donorId: donorId ?? null,
-        type: "donation",
-      },
       automatic_tax: { enabled: true },
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.redirect(session.url!, 303);
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(
