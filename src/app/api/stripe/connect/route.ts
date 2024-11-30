@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/server/auth";
-import { api } from "@/trpc/server";
+import { db } from "@/server/db";
+import { users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -37,8 +39,10 @@ async function createConnectAccount(userId: string) {
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  await api.post.addStripeAccountId.mutation({ accountId: account.id });
+  await db
+    .update(users)
+    .set({ stripeAccountId: account.id })
+    .where(eq(users.id, userId));
 
   return account;
 }
