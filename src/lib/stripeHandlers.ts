@@ -16,8 +16,8 @@ export async function createStripeAccount(userId: string) {
   // Generate an account link for onboarding
   const accountLink = await stripe.accountLinks.create({
     account: account.id,
-    refresh_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile`,
-    return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile`,
+    refresh_url: `${process.env.NEXTAUTH_URL}/profile`,
+    return_url: `${process.env.NEXTAUTH_URL}/profile`,
     type: "account_onboarding",
   });
 
@@ -88,8 +88,8 @@ export async function createDonationSession(
       },
     },
     mode: "payment",
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/events/${event.id}?success=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/events/${event.id}?canceled=true`,
+    success_url: `${process.env.NEXTAUTH_URL}/events/${event.id}?success=true`,
+    cancel_url: `${process.env.NEXTAUTH_URL}/events/${event.id}?canceled=true`,
   });
 
   if (!session.url) {
