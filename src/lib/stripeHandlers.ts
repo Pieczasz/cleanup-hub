@@ -25,7 +25,6 @@ export async function createStripeAccount(userId: string) {
 }
 
 export async function getStripeAccountStatus(userId: string) {
-  // Retrieve the user's Stripe account status
   const user = await db.query.users.findFirst({
     where: (users, { eq }) => eq(users.id, userId),
   });
