@@ -81,14 +81,34 @@ export async function POST() {
     }
 
     if (user.stripeAccountId) {
-      console.log("User already has Stripe account:", {
+      // Check if the account has completed onboarding
+      const account = await stripe.accounts.retrieve(user.stripeAccountId);
+      
+      if (account.details_submitted) {
+        console.log("User has already completed Stripe onboarding:", {
+          userId: user.id,
+          stripeAccountId: user.stripeAccountId,
+        });
+        return NextResponse.json(
+          { error: "Stripe account already exists and is fully setup" },
+          { status: 400 },
+        );
+      }
+
+      // Account exists but onboarding is incomplete - create new onboarding link
+      const accountLinks = await stripe.accountLinks.create({
+        account: user.stripeAccountId,
+        refresh_url: `${process.env.NEXTAUTH_URL}/settings`,
+        return_url: `${process.env.NEXTAUTH_URL}/settings`,
+        type: "account_onboarding",
+      });
+
+      console.log("Regenerating onboarding link for incomplete account:", {
         userId: user.id,
         stripeAccountId: user.stripeAccountId,
       });
-      return NextResponse.json(
-        { error: "Stripe account already exists" },
-        { status: 400 },
-      );
+
+      return NextResponse.json({ url: accountLinks.url });
     }
 
     try {
