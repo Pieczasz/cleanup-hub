@@ -15,11 +15,40 @@ if (!process.env.NEXTAUTH_URL) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+async function verifyStripeConnect() {
+  try {
+    // Try to retrieve account capabilities to verify Connect access
+    await stripe.accounts.list({ limit: 1 });
+    return true;
+  } catch (error) {
+    if (
+      error instanceof Stripe.errors.StripeError &&
+      error.message.includes("signed up for Connect")
+    ) {
+      return false;
+    }
+    throw error; // Re-throw other errors
+  }
+}
+
 export async function POST() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Verify Stripe Connect is enabled
+    const hasConnect = await verifyStripeConnect();
+    if (!hasConnect) {
+      return NextResponse.json(
+        {
+          error:
+            "Stripe Connect is not enabled for this account. Please contact the administrator.",
+          code: "STRIPE_CONNECT_NOT_ENABLED",
+        },
+        { status: 503 },
+      );
     }
 
     // Check if user already has a Stripe account
@@ -41,20 +70,33 @@ export async function POST() {
       );
     }
 
-    const account = await createConnectAccount(session.user.id);
+    try {
+      const account = await createConnectAccount(session.user.id);
 
-    if (!account?.id) {
-      throw new Error("Failed to create Stripe account");
+      if (!account?.id) {
+        throw new Error("Failed to create Stripe account");
+      }
+
+      const accountLinks = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.NEXTAUTH_URL}/settings`,
+        return_url: `${process.env.NEXTAUTH_URL}/settings`,
+        type: "account_onboarding",
+      });
+
+      return NextResponse.json({ url: accountLinks.url });
+    } catch (stripeError) {
+      console.error("Stripe account creation error:", stripeError);
+      return NextResponse.json(
+        {
+          error:
+            "Failed to create Stripe account. Please ensure your email is verified and try again.",
+          details:
+            stripeError instanceof Error ? stripeError.message : undefined,
+        },
+        { status: 400 },
+      );
     }
-
-    const accountLinks = await stripe.accountLinks.create({
-      account: account.id,
-      refresh_url: `${process.env.NEXTAUTH_URL}/settings`,
-      return_url: `${process.env.NEXTAUTH_URL}/settings`,
-      type: "account_onboarding",
-    });
-
-    return NextResponse.json({ url: accountLinks.url });
   } catch (error) {
     console.error("Error creating connect account:", {
       error,
@@ -77,8 +119,23 @@ export async function POST() {
 }
 
 async function createConnectAccount(userId: string) {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user?.email) {
+    throw new Error("User email is required for Stripe Connect");
+  }
+
   const account = await stripe.accounts.create({
     type: "express",
+    email: user.email,
+    country: "PL", // Assuming Poland is the default country
+    capabilities: {
+      card_payments: { requested: true },
+      transfers: { requested: true },
+    },
+    business_type: "individual",
     metadata: {
       userId,
     },
