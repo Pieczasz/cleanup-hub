@@ -28,11 +28,13 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }),
+  stripeAccountId: text("stripeAccountId"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   attendedEvents: many(eventAttendance),
+  donations: many(donations, { relationName: "userDonations" }),
 }));
 
 export const accounts = createTable(
@@ -140,6 +142,7 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
     references: [users.id],
   }),
   attendance: many(eventAttendance),
+  donations: many(donations, { relationName: "eventDonations" }),
 }));
 
 export const eventAttendance = createTable(
@@ -179,6 +182,37 @@ export const eventAttendanceRelations = relations(
   }),
 );
 
+export const donations = createTable("donation", {
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  eventId: varchar("event_id", { length: 255 })
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  donorId: varchar("donor_id", { length: 255 }).references(() => users.id, {
+    onDelete: "set null",
+    onUpdate: "cascade",
+  }),
+  amount: integer("amount").notNull(),
+  paymentIntentId: varchar("payment_intent_id", { length: 255 }).notNull(),
+  isAnonymous: boolean("is_anonymous").default(false).notNull(),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const donationsRelations = relations(donations, ({ one }) => ({
+  event: one(events, {
+    fields: [donations.eventId],
+    references: [events.id],
+  }),
+  donor: one(users, {
+    fields: [donations.donorId],
+    references: [users.id],
+  }),
+}));
+
 export type DBEvent = typeof events.$inferSelect;
 
 export type Event = {
@@ -213,4 +247,14 @@ export type UserEventHistory = {
   date: string;
   attended: boolean;
   rating: number;
+};
+
+export type Donation = {
+  id: string;
+  eventId: string;
+  donorId?: string | null;
+  amount: number;
+  paymentIntentId: string;
+  isAnonymous: boolean;
+  createdAt: Date;
 };

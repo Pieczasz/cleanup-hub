@@ -13,6 +13,10 @@ import {
   eventAttendance,
 } from "@/server/db/schema";
 import { sql, eq, desc } from "drizzle-orm";
+import {
+  createStripeAccount,
+  getStripeAccountStatus,
+} from "@/lib/stripeHandlers";
 
 export const postRouter = createTRPCRouter({
   getUserByEmail: publicProcedure
@@ -864,4 +868,14 @@ export const postRouter = createTRPCRouter({
         totalRatings: attendanceRecords.length,
       };
     }),
+
+  connectStripeAccount: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    return createStripeAccount(userId);
+  }),
+
+  getStripeAccountStatus: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    return getStripeAccountStatus(userId);
+  }),
 });

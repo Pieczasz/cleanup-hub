@@ -19,6 +19,7 @@ import Image from "next/image";
 import { UserEvents } from "@/components/UserEvents";
 import { ParticipatingInEvents } from "@/components/ParticipatingInEvents";
 import { PastUserEvents } from "@/components/PastUserEvents";
+import { StripeSettings } from "@/components/StripeSettings";
 
 // Icons
 import { StarIcon } from "@heroicons/react/24/solid";
@@ -162,6 +163,7 @@ export default function Account() {
                 Participating in Events
               </TabsTrigger>
               <TabsTrigger value="past">Past Events</TabsTrigger>
+              <TabsTrigger value="stripe">Stripe Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="profile">
               <AccountForm session={session} />
@@ -174,6 +176,9 @@ export default function Account() {
             </TabsContent>
             <TabsContent value="past">
               <PastUserEvents userId={session?.user.id} />
+            </TabsContent>
+            <TabsContent value="stripe">
+              <StripeSettings />
             </TabsContent>
           </Tabs>
         </div>
