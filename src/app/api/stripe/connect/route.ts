@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/server/auth";
-import { api } from "@/trpc/react"; // Change to react import
+import { api } from "@/trpc/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-// Create mutation hook at the top level
-const addStripeAccountIdMutation = api.post.addStripeAccountId.useMutation();
 
 export async function POST() {
   try {
@@ -40,8 +37,11 @@ async function createConnectAccount(userId: string) {
     },
   });
 
-  // Use the mutation
-  addStripeAccountIdMutation.mutate({ accountId: account.id });
+  await (
+    api.post.addStripeAccountId.mutate as (args: {
+      accountId: string;
+    }) => Promise<void>
+  )({ accountId: account.id });
 
   return account;
 }
