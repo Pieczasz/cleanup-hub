@@ -37,9 +37,9 @@ async function createConnectAccount(userId: string) {
     },
   });
 
-  // Use TRPC API call instead of direct database access
+  // Use mutation instead of mutate for server-side calls
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  await api.post.addStripeAccountId.mutate({ accountId: account.id });
+  await api.post.addStripeAccountId.mutation({ accountId: account.id });
 
   return account;
 }
