@@ -11,7 +11,7 @@ export function StripeSettings() {
 
   const handleConnectStripe = async () => {
     try {
-      const url = await connectStripeAccount();
+      const { url } = await connectStripeAccount();
       window.location.href = url;
     } catch {
       toast({
@@ -42,9 +42,7 @@ export function StripeSettings() {
       ) : (
         <div className="space-y-4">
           <div className="rounded-lg bg-yellow-50 p-4">
-            <p className="text-yellow-700">
-              ! You haven&apos;t connected a Stripe account yet
-            </p>
+            <p className="text-yellow-700">!</p>
           </div>
           <Button onClick={handleConnectStripe}>Connect Stripe Account</Button>
         </div>
