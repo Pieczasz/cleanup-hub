@@ -864,4 +864,27 @@ export const postRouter = createTRPCRouter({
         totalRatings: attendanceRecords.length,
       };
     }),
+
+  addStripeAccountId: protectedProcedure
+    .input(z.object({ accountId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new Error("User ID is not available");
+      }
+
+      const [updatedUser] = await ctx.db
+        .update(users)
+        .set({
+          stripeAccountId: input.accountId,
+        })
+        .where(sql`id = ${userId}`)
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error("Failed to update user");
+      }
+
+      return updatedUser;
+    }),
 });

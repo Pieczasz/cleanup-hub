@@ -19,7 +19,7 @@ import Image from "next/image";
 import { UserEvents } from "@/components/UserEvents";
 import { ParticipatingInEvents } from "@/components/ParticipatingInEvents";
 import { PastUserEvents } from "@/components/PastUserEvents";
-import { StripeSettings } from "@/components/StripeSettings";
+import StripeSettings from "@/components/StripeSettings";
 
 // Icons
 import { StarIcon } from "@heroicons/react/24/solid";

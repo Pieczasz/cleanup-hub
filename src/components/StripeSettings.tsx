@@ -1,52 +1,37 @@
-import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
-import { useToast } from "@/hooks/use-toast";
+"use client";
 
-export function StripeSettings() {
-  const { toast } = useToast();
-  const { data: stripeStatus, isLoading } =
-    api.post.getStripeAccountStatus.useQuery();
-  const { mutateAsync: connectStripeAccount } =
-    api.post.connectStripeAccount.useMutation();
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+
+export default function StripeSettings() {
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleConnectStripe = async () => {
+    setIsLoading(true);
     try {
-      const { url } = await connectStripeAccount();
-      window.location.href = url;
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to connect Stripe account",
-        variant: "destructive",
+      const response = await fetch("/api/stripe/connect", {
+        method: "POST",
       });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const data: { url?: string } = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Failed to create connect account:", error);
     }
+    setIsLoading(false);
   };
-
-  if (isLoading) {
-    return <div className="h-20 animate-pulse rounded-lg bg-gray-200" />;
-  }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Stripe Integration</h2>
+      <h2 className="text-2xl font-bold">Stripe Settings</h2>
       <p className="text-gray-600">
-        Connect your Stripe account to receive donations for your events.
+        Connect your Stripe account to receive donations from your events
       </p>
-
-      {stripeStatus?.connected ? (
-        <div className="rounded-lg bg-green-50 p-4">
-          <p className="text-green-700">
-            ✓ Your Stripe account is connected and ready to receive donations
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="rounded-lg bg-yellow-50 p-4">
-            <p className="text-yellow-700">!</p>
-          </div>
-          <Button onClick={handleConnectStripe}>Connect Stripe Account</Button>
-        </div>
-      )}
+      <Button onClick={handleConnectStripe} disabled={isLoading}>
+        {isLoading ? "Loading..." : "Connect Stripe Account"}
+      </Button>
     </div>
   );
 }
