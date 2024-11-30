@@ -37,11 +37,8 @@ async function createConnectAccount(userId: string) {
     },
   });
 
-  await (
-    api.post.addStripeAccountId.mutate as (args: {
-      accountId: string;
-    }) => Promise<void>
-  )({ accountId: account.id });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  await api.post.addStripeAccountId.mutation({ accountId: account.id });
 
   return account;
 }
