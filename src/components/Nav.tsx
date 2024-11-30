@@ -80,7 +80,7 @@ const Nav: React.FC<NavProps> = ({
         <Link href="/profile">
           <div className="h-8 w-8 overflow-hidden rounded-full">
             <Image
-              src={session.user.image ?? "/defaultAvatar.png"}
+              src={session.user.image ?? "/defaultAvatar.jpg"}
               alt="Profile"
               width={32}
               height={32}
