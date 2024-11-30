@@ -21,31 +21,47 @@ function PaymentSuccessContent() {
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-    if (sessionId) {
-      fetch(`/api/checkout_sessions/${sessionId}`)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          setSessionData(data as { amount_total?: number });
-          setStatus("success");
-        })
-        .catch((error) => {
-          console.error("Error fetching session data:", error);
-          setStatus("error");
-        });
+    if (!sessionId) {
+      setStatus("error");
+      return;
     }
+
+    fetch(`/api/checkout_sessions/${sessionId}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          throw new Error(
+            errorData.error ?? `HTTP error! status: ${res.status}`,
+          );
+        }
+        return res.json() as Promise<{ amount_total?: number }>;
+      })
+      .then((data) => {
+        if (!data?.amount_total) {
+          throw new Error("Invalid session data received");
+        }
+        setSessionData(data);
+        setStatus("success");
+      })
+      .catch((error) => {
+        console.error("Error fetching session data:", error);
+        setStatus("error");
+      });
   }, [sessionId]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (status === "error") {
-    return <div>Error loading payment details</div>;
+    return (
+      <div className="text-white">
+        <h1 className="mb-2 text-2xl font-bold">Something went wrong</h1>
+        <p>Unable to load payment details. Please contact support.</p>
+      </div>
+    );
   }
 
   const amount = sessionData?.amount_total
