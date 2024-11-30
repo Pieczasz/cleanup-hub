@@ -11,13 +11,12 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(req: Request) {
   try {
     const body = await req.text();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const signature = headers().get("stripe-signature")!;
+    const headersList = await headers();
+    const signature = headersList.get("stripe-signature")!;
 
     let event: Stripe.Event;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch {
       console.log(`⚠️ Webhook signature verification failed.`);
