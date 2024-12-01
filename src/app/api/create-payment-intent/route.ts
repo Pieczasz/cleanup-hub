@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Create Checkout Session with connected account
     const origin = request.headers.get("origin") ?? "http://localhost:3000";
-    
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"] as const,
       line_items: [
