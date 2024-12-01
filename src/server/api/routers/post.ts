@@ -887,4 +887,34 @@ export const postRouter = createTRPCRouter({
 
       return updatedUser;
     }),
+
+  getEventDonations: publicProcedure
+    .input(z.object({ eventId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const donationRecords = await ctx.db.query.donations.findMany({
+        where: (donations) => eq(donations.eventId, input.eventId),
+        orderBy: (donations) => desc(donations.createdAt),
+        with: {
+          donor: {
+            columns: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      return donationRecords.map((record) => ({
+        amount: record.amount,
+        createdAt: record.createdAt,
+        user: record.donor
+          ? {
+              id: record.donor.id,
+              name: record.donor.name,
+              image: record.donor.image,
+            }
+          : null,
+      }));
+    }),
 });

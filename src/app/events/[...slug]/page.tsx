@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { DonateButton } from "@/components/DonateButton";
+import { DonationsList } from "@/components/DonationsList"; // Add import
 // Functions
 import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
@@ -113,6 +114,12 @@ const EventPage = ({ params }: PostPageProps) => {
   const { data: eventAttendance } = api.post.getEventAttendance.useQuery(
     { eventId: event?.id ?? "" },
     { enabled: !!event?.id && event?.isFinished },
+  );
+
+  // Add this query with other queries
+  const { data: donations } = api.post.getEventDonations.useQuery(
+    { eventId: event?.id ?? "" },
+    { enabled: !!event?.id }
   );
 
   const utils = api.useContext();
@@ -555,6 +562,9 @@ const EventPage = ({ params }: PostPageProps) => {
                           Open in Google Maps
                         </Button>
                       </div>
+
+                      {/* Add the DonationsList component at the bottom of the right column */}
+                      {donations && <DonationsList donations={donations} />}
                     </div>
                   </div>
 
