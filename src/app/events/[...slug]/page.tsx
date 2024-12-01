@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import DonateButton from "@/components/DonateButton";
+import { DonateButton } from "@/components/DonateButton";
 // Functions
 import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/server/db";
-import type { events } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { events } from "@/server/db/schema";
+import { and, eq } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
@@ -11,17 +11,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as {
-      amount: number;
-      eventId: string;
-      donorId: string;
-    };
-    const { amount, eventId, donorId } = body;
+    const body = await request.json() as { amount: number; eventId: string; donorId?: string };
+    const { amount, eventId } = body;
+
+    if (!eventId || typeof eventId !== "string") {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+    }
+
+    const donorId = body.donorId;
 
     // Get event and creator details
     const event = await db.query.events.findFirst({
-      where: eq(events.id, eventId),
-      include: {
+      where: (events) => eq(events.id, eventId),
+      with: {
         creator: true,
       },
     });
@@ -69,8 +75,7 @@ export async function POST(request: NextRequest) {
       payment_intent_data: {
         application_fee_amount: platformFee,
         transfer_data: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          destination: event.creator.stripeAccountId!,
+          destination: event.creator.stripeAccountId,
         },
       },
       metadata: {

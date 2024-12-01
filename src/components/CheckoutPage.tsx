@@ -1,9 +1,8 @@
 // src/components/CheckoutPage.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { useState } from "react";
 
 interface CheckoutPageProps {
   amount: number;
@@ -14,31 +13,35 @@ interface CheckoutPageProps {
 const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+    
     try {
-      const response = await fetch("/api/create-payment-intent", {
-        method: "POST",
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: amount * 100, // Convert to cents
+          amount: amount * 100,
           eventId,
         }),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = await response.json();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      
       if (data.url) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
-      console.error("Payment error:", error);
+      console.error('Checkout error:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -58,13 +61,11 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
             Back
           </Button>
         )}
-        <form action="/api/checkout_sessions" method="POST" className="w-full">
-          <input type="hidden" name="amount" value={amount} />
-          <input type="hidden" name="eventId" value={eventId} />
-          <Button
-            onClick={handleCheckout}
-            disabled={isLoading}
+        <form onSubmit={handleSubmit} className="w-full">
+          <Button 
+            type="submit" 
             className="w-full"
+            disabled={!eventId || isLoading}
           >
             {isLoading ? "Processing..." : "Proceed to Checkout"}
           </Button>
