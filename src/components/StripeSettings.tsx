@@ -18,7 +18,10 @@ export default function StripeSettings() {
   const [account, setAccount] = useState<StripeAccount | null>(null);
 
   useEffect(() => {
-    await fetchAccountDetails();
+    const init = async () => {
+      await fetchAccountDetails();
+    };
+    init().catch((error) => console.error("Failed to initialize:", error));
   }, []);
 
   const fetchAccountDetails = async () => {
