@@ -57,8 +57,10 @@ export async function POST(request: NextRequest) {
     const platformFee = Math.round(amount * 0.08);
 
     // Create Checkout Session with connected account
+    const origin = request.headers.get("origin") ?? "http://localhost:3000";
+    
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ["card"] as const,
       line_items: [
         {
           price_data: {
@@ -72,8 +74,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${request.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get("origin")}/events/${eventId}`,
+      success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/events/${eventId}`,
       payment_intent_data: {
         application_fee_amount: platformFee,
         transfer_data: {
@@ -82,10 +84,10 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         eventId,
-        donorId,
+        donorId: donorId ?? "",
         type: "donation",
       },
-    });
+    } as Stripe.Checkout.SessionCreateParams);
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
