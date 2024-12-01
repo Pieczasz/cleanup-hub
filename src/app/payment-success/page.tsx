@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 function LoadingSpinner() {
   return (
@@ -16,9 +15,11 @@ function PaymentSuccessContent() {
   );
   const [sessionData, setSessionData] = useState<{
     amount_total?: number;
+    event_id?: string;
   } | null>(null);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const router = useRouter();
 
   useEffect(() => {
     if (!sessionId) {
@@ -36,10 +37,10 @@ function PaymentSuccessContent() {
             errorData.error ?? `HTTP error! status: ${res.status}`,
           );
         }
-        return res.json() as Promise<{ amount_total?: number }>;
+        return res.json() as Promise<{ amount_total?: number; event_id?: string }>;
       })
       .then((data) => {
-        if (!data?.amount_total) {
+        if (!data?.amount_total || !data?.event_id) {
           throw new Error("Invalid session data received");
         }
         setSessionData(data);
@@ -50,6 +51,15 @@ function PaymentSuccessContent() {
         setStatus("error");
       });
   }, [sessionId]);
+
+  useEffect(() => {
+    if (status === "success" && sessionData?.event_id) {
+      const timer = setTimeout(() => {
+        router.push(`/events/${sessionData.event_id}`);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, sessionData, router]);
 
   if (status === "loading") {
     return <LoadingSpinner />;
