@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import DonateButton from "@/components/DonateButton";
 // Functions
 import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
@@ -504,13 +505,12 @@ const EventPage = ({ params }: PostPageProps) => {
                         ) : (
                           <>
                             {/* Add the Donate button - place it before the Join/Leave button */}
-                            <Button
+                            <DonateButton
+                              event={event}
+                              disabled={isActionsDisabled(event)}
                               onClick={handleDonateClick}
                               className="w-full rounded-3xl bg-purple-600 py-4 text-base hover:bg-purple-600/90 sm:w-auto sm:py-5 sm:text-lg"
-                              disabled={isActionsDisabled(event)}
-                            >
-                              Donate
-                            </Button>
+                            />
                             <Button
                               onClick={handleEventParticipation}
                               className={`w-full rounded-3xl py-4 text-base sm:w-auto sm:py-5 sm:text-lg ${

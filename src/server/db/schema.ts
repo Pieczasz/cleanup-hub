@@ -258,3 +258,10 @@ export type Donation = {
   isAnonymous: boolean;
   createdAt: Date;
 };
+
+export type Creator = {
+  id: string;
+  name: string;
+  email: string;
+  stripeAccountId: string;
+};

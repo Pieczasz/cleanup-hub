@@ -98,8 +98,8 @@ export async function POST() {
       // Account exists but onboarding is incomplete - create new onboarding link
       const accountLinks = await stripe.accountLinks.create({
         account: user.stripeAccountId,
-        refresh_url: `${process.env.NEXTAUTH_URL}/settings`,
-        return_url: `${process.env.NEXTAUTH_URL}/settings`,
+        refresh_url: `${process.env.NEXTAUTH_URL}/profile`,
+        return_url: `${process.env.NEXTAUTH_URL}/profile`,
         type: "account_onboarding",
       });
 
@@ -120,8 +120,8 @@ export async function POST() {
 
       const accountLinks = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `${process.env.NEXTAUTH_URL}/settings`,
-        return_url: `${process.env.NEXTAUTH_URL}/settings`,
+        refresh_url: `${process.env.NEXTAUTH_URL}/profile`,
+        return_url: `${process.env.NEXTAUTH_URL}/profile`,
         type: "account_onboarding",
       });
 

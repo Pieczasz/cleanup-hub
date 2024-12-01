@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { db } from "@/server/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
@@ -44,7 +45,19 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ received: true });
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+
+      // Save donation record
+      await db.insert(donations).values({
+        id: crypto.randomUUID(),
+        eventId: session.metadata.eventId,
+        donorId: session.metadata.donorId,
+        amount: session.amount_total,
+        paymentIntentId: session.payment_intent,
+        isAnonymous: false,
+      });
+    }
   } catch (err) {
     console.error("Webhook error:", err);
     return NextResponse.json(
@@ -52,6 +65,8 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+
+  return NextResponse.json({ received: true });
 }
 
 export const config = {
