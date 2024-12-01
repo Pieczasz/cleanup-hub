@@ -37,7 +37,10 @@ function PaymentSuccessContent() {
             errorData.error ?? `HTTP error! status: ${res.status}`,
           );
         }
-        return res.json() as Promise<{ amount_total?: number; event_id?: string }>;
+        return res.json() as Promise<{
+          amount_total?: number;
+          event_id?: string;
+        }>;
       })
       .then((data) => {
         if (!data?.amount_total || !data?.event_id) {

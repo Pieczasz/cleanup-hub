@@ -8,22 +8,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
 
   try {
+    console.log(`Retrieving session with ID: ${id}`);
+
     if (!id.startsWith("cs_")) {
       throw new Error("Invalid session ID");
     }
 
     const session = await stripe.checkout.sessions.retrieve(id);
 
-    // Assuming the event_id is stored in the metadata of the session
-    const eventId = session.metadata?.event_id;
+    console.log(`Session retrieved: ${JSON.stringify(session)}`);
+
+    // Use the correct key from the metadata
+    const eventId = session.metadata?.eventId;
 
     if (!eventId) {
-      throw new Error("Event ID not found in session metadata");
+      console.error("Event ID not found in session metadata");
+      return NextResponse.json(
+        { error: "Event ID not found in session metadata" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({
@@ -32,10 +40,10 @@ export async function GET(
       event_id: eventId,
     });
   } catch (error) {
-    console.error("Error retrieving checkout session:", error);
+    console.error("Error retrieving checkout session:", error.message);
     return NextResponse.json(
       { error: "Failed to retrieve checkout session" },
-      { status: 404 },
+      { status: 404 }
     );
   }
 }
