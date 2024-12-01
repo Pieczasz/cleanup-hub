@@ -19,9 +19,17 @@ export async function GET(
 
     const session = await stripe.checkout.sessions.retrieve(id);
 
+    // Assuming the event_id is stored in the metadata of the session
+    const eventId = session.metadata?.event_id;
+
+    if (!eventId) {
+      throw new Error("Event ID not found in session metadata");
+    }
+
     return NextResponse.json({
       amount_total: session.amount_total,
       status: session.status,
+      event_id: eventId,
     });
   } catch (error) {
     console.error("Error retrieving checkout session:", error);
