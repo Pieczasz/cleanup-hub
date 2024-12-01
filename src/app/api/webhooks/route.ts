@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/server/db";
+import { donations } from "@/server/db/schema";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
@@ -48,13 +49,21 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
+      if (
+        !session.metadata?.eventId ||
+        !session.amount_total ||
+        !session.payment_intent
+      ) {
+        throw new Error("Missing required session data");
+      }
+
       // Save donation record
       await db.insert(donations).values({
         id: crypto.randomUUID(),
         eventId: session.metadata.eventId,
-        donorId: session.metadata.donorId,
+        donorId: session.metadata.donorId ?? null,
         amount: session.amount_total,
-        paymentIntentId: session.payment_intent,
+        paymentIntentId: session.payment_intent as string,
         isAnonymous: false,
       });
     }
