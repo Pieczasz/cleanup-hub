@@ -16,12 +16,12 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
+      const response = await fetch("/api/create-payment-intent", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           amount: amount * 100,
@@ -29,15 +29,17 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
         }),
       });
 
-      const data = await response.json();
-      
+      const data: { url?: string } = (await response.json()) as {
+        url?: string;
+      };
+
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error("No checkout URL received");
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
       // You might want to show an error message to the user here
     } finally {
       setIsLoading(false);
@@ -62,8 +64,8 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
           </Button>
         )}
         <form onSubmit={handleSubmit} className="w-full">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
             disabled={!eventId || isLoading}
           >
