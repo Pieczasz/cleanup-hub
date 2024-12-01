@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/server/db";
-import { events } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
@@ -11,7 +10,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as { amount: number; eventId: string; donorId?: string };
+    const body = (await request.json()) as {
+      amount: number;
+      eventId: string;
+      donorId?: string;
+    };
     const { amount, eventId } = body;
 
     if (!eventId || typeof eventId !== "string") {
@@ -43,8 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!event.creator ?? !event.creator.stripeAccountId) {
+    if (!event.creator.stripeAccountId) {
       return NextResponse.json(
         { error: "Event creator has not connected their Stripe account" },
         { status: 400 },
