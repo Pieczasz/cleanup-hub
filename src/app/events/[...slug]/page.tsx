@@ -119,7 +119,7 @@ const EventPage = ({ params }: PostPageProps) => {
   // Add this query with other queries
   const { data: donations } = api.post.getEventDonations.useQuery(
     { eventId: event?.id ?? "" },
-    { enabled: !!event?.id }
+    { enabled: !!event?.id },
   );
 
   const utils = api.useContext();
