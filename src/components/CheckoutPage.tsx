@@ -29,12 +29,10 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const data: { url?: string } = (await response.json()) as {
+        url?: string;
+      };
 
-      const data: { url?: string } = await response.json() as { url?: string };
-      
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -42,6 +40,7 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
       }
     } catch (error) {
       console.error("Checkout error:", error);
+      // You might want to show an error message to the user here
     } finally {
       setIsLoading(false);
     }

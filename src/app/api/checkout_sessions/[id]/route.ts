@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
 
@@ -30,7 +30,7 @@ export async function GET(
       console.error("Event ID not found in session metadata");
       return NextResponse.json(
         { error: "Event ID not found in session metadata" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -40,10 +40,10 @@ export async function GET(
       event_id: eventId,
     });
   } catch (error) {
-    console.error("Error retrieving checkout session:", error);
+    console.error("Error retrieving checkout session:", error.message);
     return NextResponse.json(
       { error: "Failed to retrieve checkout session" },
-      { status: 404 },
+      { status: 404 }
     );
   }
 }

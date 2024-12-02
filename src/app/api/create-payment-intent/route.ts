@@ -67,9 +67,6 @@ export async function POST(request: NextRequest) {
             currency: "usd",
             product_data: {
               name: `Donation for ${event.title}`,
-              metadata: {
-                eventId: eventId,
-              },
             },
             unit_amount: amount,
           },

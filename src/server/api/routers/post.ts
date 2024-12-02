@@ -194,10 +194,7 @@ export const postRouter = createTRPCRouter({
       return updatedEvent;
     }),
   getEventsFromMostPopular: publicProcedure.query(async ({ ctx }) => {
-    const eventsData = await ctx.db
-      .select()
-      .from(events)
-      .where(eq(events.isFinished, false));
+    const eventsData = await ctx.db.select().from(events);
 
     return eventsData
       .map((dbEvent: DBEvent): Event => {
