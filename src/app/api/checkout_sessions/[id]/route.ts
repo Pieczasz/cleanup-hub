@@ -8,18 +8,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await context.params;
-
   try {
-    console.log(`Retrieving session with ID: ${id}`);
+    const sessionId = params.id;
+    console.log(`Retrieving session with ID: ${sessionId}`);
 
-    if (!id.startsWith("cs_")) {
+    if (!sessionId.startsWith("cs_")) {
       throw new Error("Invalid session ID");
     }
 
-    const session = await stripe.checkout.sessions.retrieve(id);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     console.log(`Session retrieved: ${JSON.stringify(session)}`);
 
