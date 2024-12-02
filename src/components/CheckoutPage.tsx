@@ -33,7 +33,7 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: { url?: string } = await response.json() as { url?: string };
       
       if (data.url) {
         window.location.href = data.url;
