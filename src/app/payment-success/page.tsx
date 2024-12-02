@@ -30,11 +30,11 @@ function PaymentSuccessContent() {
     fetch(`/api/checkout_sessions/${sessionId}`)
       .then(async (res) => {
         if (!res.ok) {
-          const errorData = (await res.json().catch(() => ({}))) as {
+          const errorData = await res.json().catch(() => ({})) as {
             error?: string;
           };
           throw new Error(
-            errorData.error ?? `HTTP error! status: ${res.status}`,
+            errorData.error ?? `Failed to load payment details (${res.status})`
           );
         }
         return res.json() as Promise<{
