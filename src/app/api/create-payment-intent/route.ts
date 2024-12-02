@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate platform fee (8%)
-    const platformFee = Math.round(amount * 0.08);
+    const platformFee = Math.round(amount * 100 * 0.08); // Convert to cents before calculating fee
 
     // Create Checkout Session with connected account
     const origin = request.headers.get("origin") ?? "http://localhost:3000";
@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
             currency: "usd",
             product_data: {
               name: `Donation for ${event.title}`,
+              description: `Support this cleanup event`,
             },
-            unit_amount: amount,
+            unit_amount: amount * 100, // Convert to cents
           },
           quantity: 1,
         },
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
         eventId,
         donorId: donorId ?? "",
         type: "donation",
+        platformFee: platformFee.toString(),
       },
     } as Stripe.Checkout.SessionCreateParams);
 

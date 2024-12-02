@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import Stripe from "stripe";
 import { db } from "@/server/db";
 import { donations } from "@/server/db/schema";
@@ -48,25 +48,34 @@ export async function POST(req: Request) {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
+      console.log("Processing completed checkout session:", session.id);
 
-      if (
-        !session.metadata?.eventId ||
-        !session.amount_total ||
-        !session.payment_intent
-      ) {
-        throw new Error("Missing required session data");
+      try {
+        await db.insert(donations).values({
+          id: crypto.randomUUID(),
+          eventId:
+            session.metadata?.eventId ??
+            (() => {
+              throw new Error("eventId is missing in session metadata");
+            })(),
+          donorId: session.metadata?.donorId ?? undefined,
+          amount: session.amount_total!,
+          platformFee: Number(session.metadata?.platformFee) || 0,
+          stripeSessionId: session.id,
+          status: "completed",
+          createdAt: new Date(),
+        });
+
+        console.log(
+          `Donation recorded successfully: ${session.id}, Amount: ${session.amount_total}, Fee: ${session.metadata?.platformFee}`,
+        );
+      } catch (error) {
+        console.error("Failed to record donation:", error);
+        throw error; // Re-throw to trigger error response
       }
-
-      // Save donation record
-      await db.insert(donations).values({
-        id: crypto.randomUUID(),
-        eventId: session.metadata.eventId,
-        donorId: session.metadata.donorId ?? null,
-        amount: session.amount_total,
-        paymentIntentId: session.payment_intent as string,
-        isAnonymous: false,
-      });
     }
+
+    return NextResponse.json({ received: true });
   } catch (err) {
     console.error("Webhook error:", err);
     return NextResponse.json(
@@ -74,8 +83,6 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-
-  return NextResponse.json({ received: true });
 }
 
 export const config = {

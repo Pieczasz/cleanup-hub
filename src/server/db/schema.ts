@@ -195,8 +195,9 @@ export const donations = createTable("donation", {
     onUpdate: "cascade",
   }),
   amount: integer("amount").notNull(),
-  paymentIntentId: varchar("payment_intent_id", { length: 255 }).notNull(),
-  isAnonymous: boolean("is_anonymous").default(false).notNull(),
+  platformFee: integer("platform_fee").notNull(),
+  stripeSessionId: varchar("stripe_session_id", { length: 255 }).notNull().unique(),
+  status: varchar("status", { length: 255 }).notNull(),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
