@@ -8,10 +8,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
+
   try {
-    const sessionId = params.id;
+    const sessionId = id;
     console.log(`Retrieving session with ID: ${sessionId}`);
 
     if (!sessionId.startsWith("cs_")) {
