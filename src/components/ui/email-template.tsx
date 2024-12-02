@@ -19,7 +19,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
       <p>Cleanup Hub</p>
       <p>123 Clean Street, Clean City, CL 12345</p>
       {/* //TODO: Add actual email */}
-      <p>Email: support@cleanuphub.com</p>
+      <p>Email: support@cleanuphub.live</p>
     </footer>
   </div>
 );
