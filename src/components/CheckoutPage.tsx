@@ -24,7 +24,7 @@ const CheckoutPage = ({ amount, eventId, onCancel }: CheckoutPageProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: amount * 100,
+          amount,
           eventId,
         }),
       });
